@@ -1,0 +1,64 @@
+// Media Queries
+// $gap: 40px;
+// $tablet: 768px;
+// $desktop: 1080px;
+// $widescreen: 1600px;
+// $widescreen-enabled: true;
+// $breakpoint-sm: 480px;
+// $breakpoint-md: $tablet;      // 768px
+// $breakpoint-lg: $desktop;     // 1080px
+// $breakpoint-xl: $widescreen;  // 1600px
+
+$breakpoint-sm-min: $breakpoint-sm;
+$breakpoint-md-min: $breakpoint-md;
+$breakpoint-lg-min: $breakpoint-lg;
+$breakpoint-xl-min: $breakpoint-xl;
+$breakpoint-xxl-min: $breakpoint-xxl;
+
+$breakpoint-xs-max: $breakpoint-sm - 1px;
+$breakpoint-sm-max: $breakpoint-md - 1px;
+$breakpoint-md-max: $breakpoint-lg - 1px;
+$breakpoint-lg-max: $breakpoint-xl - 1px;
+$breakpoint-xl-max: $breakpoint-xxl - 1px;
+
+$breakpoints: ('print': 'print',
+  'portrait': 'screen and (orientation: portrait)',
+  'landscape': 'screen and (orientation: landscape)',
+  'xs': 'screen and (max-width: '+ $breakpoint-xs-max + ')',
+  'sm': 'screen and (min-width: '+ $breakpoint-sm-min + ') and (max-width: '+ $breakpoint-sm-max + ')',
+  'md': 'screen and (min-width: '+ $breakpoint-md-min + ') and (max-width: '+ $breakpoint-md-max + ')',
+  'lg': 'screen and (min-width: '+ $breakpoint-lg-min + ') and (max-width: '+ $breakpoint-lg-max + ')',
+  'xl': 'screen and (min-width: '+ $breakpoint-xl-min + ')',
+  'xxl': 'screen and (min-width: ' + $breakpoint-xxl-min + ')',
+  'xs-only': 'screen and (max-width: '+ $breakpoint-xs-max + ')',
+  'sm-only': 'screen and (min-width: '+ $breakpoint-sm-min + ') and (max-width: '+ $breakpoint-sm-max + ')',
+  'md-only': 'screen and (min-width: '+ $breakpoint-md-min + ') and (max-width: '+ $breakpoint-md-max + ')',
+  'lg-only': 'screen and (min-width: '+ $breakpoint-lg-min + ') and (max-width: '+ $breakpoint-lg-max + ')',
+  'xl-only': 'screen and (min-width: '+ $breakpoint-xl-min + ')',
+  'xxl-only': 'screen and (min-width: ' + $breakpoint-xxl-min + ')',
+  'xs-down': 'screen and (max-width: '+ $breakpoint-xs-max + ')',
+  'sm-down': 'screen and (max-width: '+ $breakpoint-sm-max + ')',
+  'md-down': 'screen and (max-width: '+ $breakpoint-md-max + ')',
+  'lg-down': 'screen and (max-width: '+ $breakpoint-lg-max + ')',
+  'sm-up': 'screen and (min-width: '+ $breakpoint-sm-min + ')',
+  'md-up': 'screen and (min-width: '+ $breakpoint-md-min + ')',
+  'lg-up': 'screen and (min-width: '+ $breakpoint-lg-min + ')',
+  'xl-up': 'screen and (min-width: '+ $breakpoint-xl-min + ')',
+  'xxl-up': 'screen and (min-width: ' + $breakpoint-xxl-min + ')',
+  'md-ls': 'screen and (min-width: '+$breakpoint-md-min+') and (max-width: '+$breakpoint-md-max+') and (orientation: landscape)',
+  'md-pr': 'screen and (min-width: '+$breakpoint-md-min+') and (max-width: '+$breakpoint-md-max+') and (orientation: portrait)',
+  'mobile': 'screen and (max-width: '+$breakpoint-md-max+')',
+  'desktop': 'screen and (min-width: '+$breakpoint-lg-min+'), print'
+) !default;
+
+@mixin mq($breakpoint: md) {
+  @media #{map-get($breakpoints, $breakpoint)} {
+    @content;
+  }
+}
+
+
+/* Usage: */
+// @include mq(sm) {
+//   ...
+// }

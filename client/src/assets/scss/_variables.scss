@@ -1,0 +1,156 @@
+$gray50: #f9fafb !default;
+$gray100: #f3f4f6 !default;
+$gray200: #e5e7eb !default;
+$gray300: #d1d5db !default;
+$gray400: #9ca3af !default;
+$gray500: #6b7280 !default;
+$gray600: #4b5563 !default;
+$gray700: #374151 !default;
+$gray800: #1f2937 !default;
+$gray900: #111827 !default;
+
+$slate50: #f8fafc !default;
+$slate100: #f1f5f9 !default;
+$slate200: #e2e8f0 !default;
+$slate300: #cbd5e1 !default;
+$slate400: #94a3b8 !default;
+$slate500: #64748b !default;
+$slate600: #475569 !default;
+$slate700: #334155 !default;
+$slate800: #1e293b !default;
+$slate900: #0f172a !default;
+
+// Brand colors
+$primary: greenyellow !default;
+$greenyellow: greenyellow !default;
+$green: green !default;
+$lime: lime !default;
+
+$text: $slate200;
+$text-strong: $slate100;
+
+// Fonts
+$family-sans-serif: -apple-system,
+'DM Sans',
+BlinkMacSystemFont,
+"Segoe UI",
+"Helvetica Neue",
+"Helvetica",
+"Arial",
+sans-serif;
+// $family-heading: 'Montserrat', sans-serif;
+// $family-sans-serif: 'Avenir', Helvetica, Arial, sans-serif;
+$family-heading: $family-sans-serif;
+$widescreen-enabled: false;
+$fullhd-enabled: false;
+
+$body-size: 16px;
+$body-line-height: 1.6;
+
+$size-1: 3rem !default;
+$size-2: 2.5rem !default;
+$size-3: 2rem !default;
+$size-4: 1.5rem !default;
+$size-5: 1.25rem !default;
+$size-6: 1rem !default;
+$size-7: 0.75rem !default;
+
+$weight-light: 300;
+$weight-normal: 400;
+$weight-medium: 500;
+$weight-semibold: 600;
+$weight-bold: 700;
+$weight-black: 900;
+
+
+// Spacing
+$block-spacing: 1.5rem !default;
+
+// Link colors
+$link: $primary;
+$link-invert: $slate400;
+$link-visited: $lime;
+$link-hover: $lime;
+// $link-hover-border: $grey-light !default
+$link-focus: $primary;
+// $link-focus-border: $navy;
+$link-active: $lime;
+// $link-active-border: $grey-dark;
+$info: $primary ;
+$info-invert: #fff;
+
+// Responsive Breakpoints
+$gap: 40px;
+$tablet: 768px;
+$desktop: 1080px;
+$widescreen: 1600px;
+$widescreen-enabled: true;
+// $breakpoint-sm: 480px;
+// $breakpoint-md: $tablet;
+// $breakpoint-lg: $desktop;
+// $breakpoint-xl: $widescreen;
+
+// Responsive Breakpoints
+$breakpoint-sm: 560px !default;
+$breakpoint-md: 768px !default;
+$breakpoint-lg: 1080px !default;
+$breakpoint-xl: 1280px !default;
+$breakpoint-xxl: 1600px !default;
+
+// z-index
+$zindex-toplevel: 999999;
+$zindex-pageloading: 99999;
+$zindex-appbanner: 1100;
+$zindex-modal: 1080;
+$zindex-header: 1060;
+$zindex-tooltip: 1040;
+$zindex-loading: 1020;
+$zindex-contact: 1000;
+$zindex-footer: 1;
+
+// Generic
+$body-overflow-x: hidden;
+$body-overflow-y: auto;
+
+// Box
+// $box-color: transparent;
+// $box-shadow: 0 0.5rem 2rem rgba($grey-dark, 0.07);
+// $box-padding: 1.6rem 2rem;
+// $box-link-hover-shadow: 0 0.5rem 2rem rgba($grey-dark, 0.2);
+// $box-link-active-shadow: $box-link-hover-shadow;
+
+// Grid
+$tile-spacing: 1.5rem;
+
+// Misc
+$easing: ease-out !default;
+$radius-small: 2px !default;
+$radius: 0.25rem;
+$radius-large: 6px !default;
+$radius-rounded: 290486px !default;
+$speed: 86ms !default;
+
+
+// Elements -----------------------
+
+// Buttons
+// $button-border-width: 2px;
+
+
+// Components -----------------------
+
+// Card
+// $card-background-color: transparent;
+$card-shadow: 0px 0.3px 1.3px rgba(0, 0, 0, 0.02),
+0px 1.1px 4.5px rgba(0, 0, 0, 0.03),
+0px 5px 20px rgba(0, 0, 0, 0.05);
+
+
+
+// $card-header-shadow: none;
+
+
+
+// Content --------------------------
+$content-heading-color: inherit;
+$content-heading-weight: $weight-bold;
