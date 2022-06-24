@@ -3,7 +3,8 @@ import { useState, useEffect } from "react";
 import useEth from "../../contexts/EthContext/useEth";
 import NoticeNoArtifact from "./NoticeNoArtifact";
 import NoticeWrongNetwork from "./NoticeWrongNetwork";
-import TicketModal from "./TicketModal";
+import NewTicketModal from "./NewTicketModal";
+import TicketInfoModal from "./TicketInfoModal";
 import TableDragSelect from "./TableDragSelect";
 import rooms from "./RoomNames";
 import { add, format } from "date-fns";
@@ -34,11 +35,14 @@ function Demo () {
   const { state } = useEth()
   const { state: { contract, accounts } } = useEth()
 
-  const [newEventModalShown, setNewEventModalShown] = useState(false);
+  const [newTicketModalShown, setNewTicketModalShown] = useState(false);
   const cancelNewEvent = () => {
     resetSelection();
-    setNewEventModalShown(false);
+    setNewTicketModalShown(false);
   }
+
+  const [ticketInfoModalShown, setTicketInfoModalShown] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
 
   const [slots, setSlots] = useState<Slot[][]>([...Array(ROOM_NAMES.length)].map(() => [...Array(SLOT_LENGTH)].map((x) => {
     return {
@@ -75,7 +79,10 @@ function Demo () {
     if (!res || !res.length) return [];
 
     const activeTickets = res.filter((item: any) => item.isActive).map((item: any) => {
-      const { id, title, room, from, duration } = item;
+      const { title, room } = item;
+      const id = Number(item.id);
+      const from = Number(item.from);
+      const duration = Number(item.duration);
       const roomId = ROOM_NAMES.indexOf(room);
       const to = from + duration;
       const date = TOMORROW;
@@ -138,17 +145,22 @@ function Demo () {
   }, [contract]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
-  const bookRoom = async (title: string) => {
-    setNewEventModalShown(false);
+  const book = async (title: string) => {
+    setNewTicketModalShown(false);
     resetSelection();
+    if (newTicket.room === "") {
+      console.error('error')
+      return;
+    }
     const { roomId, room, from, duration } = newTicket;
     try {
-      const res = await contract.methods.bookRoom(title, room, from, duration).send({ from: accounts[0] })
+      const res = await contract.methods.book(title, room, from, duration).send({ from: accounts[0] })
       if (res.status === '0x0') {
         throw new Error('Transaction failed');
       }
     } catch {
       // TODO: error handling
+      return;
     }
     // TODO: error handling
 
@@ -161,9 +173,33 @@ function Demo () {
       slots[row][col + i].booked = true;
     }
     setSlots(slots);
+  }
 
-    // if success, update slots
-    // loadSlots();
+  const removeTicket = async (ticket: Ticket) => {
+    console.log('remove ticket: ', ticket);
+    try {
+      const res = await contract.methods.removeTicket(ticket.id).send({ from: accounts[0] })
+      if (res.status === '0x0') {
+        throw new Error('Transaction failed');
+      }
+    } catch {
+      // TODO: error handling
+      return;
+    }
+    console.log('deleted!')
+
+    // update slots
+    const row = ticket.roomId;
+    const col = ticket.from - OPEN_AT;
+    for (let i = 0; i < ticket.duration; i++) {
+      slots[row][col + i].disabled = false;
+      slots[row][col + i].booked = false;
+    }
+    delete slots[row][col].ticket;
+
+    // close modal
+    setTicketInfoModalShown(false);
+    // if (selectedTicket) setSelectedTicket(null);
   }
 
   const handleSelectSlots = async (slots: any[], selected: any[]) => {
@@ -179,7 +215,7 @@ function Demo () {
     setNewTicket({ roomId, room, from, to, duration, date })
 
     // showDialog
-    setNewEventModalShown(true);
+    setNewTicketModalShown(true);
   };
 
   const resetSelection = () => {
@@ -191,6 +227,14 @@ function Demo () {
     }));
     setSlots(newSlots);
   };
+
+  const handleClickTicket = (e: Event, ticket: Ticket) => {
+    if (!ticket || ticket.id === undefined) return
+    // TODO: tap to show detail, delete option
+    console.log('Ticket clicked: ', ticket)
+    setSelectedTicket(ticket);
+    setTicketInfoModalShown(true);
+  }
 
   const demo =
     <>
@@ -207,18 +251,25 @@ function Demo () {
           onChange={handleSelectSlots}
           onSelectionStart={(event: Event) => console.log("start", event)}
           onInput={(event: Event) => console.log("event", event)}
+          onClickTicket={handleClickTicket}
         />
 
       </div>
 
 
-      <TicketModal
-        isActive={newEventModalShown}
+      <NewTicketModal
+        isActive={newTicketModalShown}
         cancel={cancelNewEvent}
         newTicket={newTicket}
-        save={bookRoom}
+        save={book}
       />
 
+      <TicketInfoModal
+        isActive={ticketInfoModalShown}
+        ticket={selectedTicket}
+        remove={removeTicket}
+        close={() => setTicketInfoModalShown(false)}
+      />
     </>
 
   return (

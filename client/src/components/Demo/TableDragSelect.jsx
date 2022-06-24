@@ -33,7 +33,8 @@ export default class TableDragSelect extends React.Component {
     maxColumns: PropTypes.number,
     onSelectionStart: PropTypes.func,
     onInput: PropTypes.func,
-    onChange: PropTypes.func
+    onChange: PropTypes.func,
+    onClickTicket: PropTypes.func
   };
 
   static defaultProps = {
@@ -42,7 +43,8 @@ export default class TableDragSelect extends React.Component {
     maxColumns: Infinity,
     onSelectionStart: () => { },
     onInput: () => { },
-    onChange: () => { }
+    onChange: () => { },
+    onClickTicket: () => { }
   };
 
   state = {
@@ -66,10 +68,12 @@ export default class TableDragSelect extends React.Component {
 
   render = () => {
     return (
-      <table className={styles.tableDragSelect}>
-        <thead>{this.renderColHerder()}</thead>
-        <tbody>{this.renderRows()}</tbody>
-      </table>
+      <>
+        <table className={styles.tableDragSelect}>
+          <thead>{this.renderColHerder()}</thead>
+          <tbody>{this.renderRows()}</tbody>
+        </table>
+      </>
     )
   };
 
@@ -98,6 +102,7 @@ export default class TableDragSelect extends React.Component {
               ticket={this.props.value[i][j].ticket}
               hasChild={this.props.value[i][j].ticket && true}
               beingSelected={this.isCellBeingSelected(i, j)}
+              onClickTicket={this.props.onClickTicket}
             />
           ))}
         </tr>
@@ -223,8 +228,10 @@ class Cell extends React.Component {
       selected,
       onTouchStart,
       onTouchMove,
+      onClickTicket,
       ...props
     } = this.props
+
     if (booked) {
       classNames.push(styles.booked)
       if (hasChild) {
@@ -250,7 +257,8 @@ class Cell extends React.Component {
         key={props.key}
         {...props}
       >
-        {this.props.hasChild && <Ticket ticket={ticket} />}
+        {this.props.hasChild && <Ticket ticket={ticket} onClickTicket={this.props.onClickTicket} />}
+        <p>{ }</p>
       </td>
     )
   };
@@ -271,18 +279,13 @@ class Cell extends React.Component {
 class Ticket extends React.Component {
 
   render = () => {
-    const handleClick = () => {
-      if (ticket.id === undefined) return
-      // TODO: tap to show detail, delete option
-      console.log('Ticket clicked: ', ticket)
-    }
     let { ticket } = this.props
 
     return (
       <div
         className={styles.ticket}
         data-duration={ticket.duration}
-        onClick={e => handleClick(e, ticket)}
+        onClick={e => this.props.onClickTicket(e, ticket)}
         style={{ width: `calc(${ticket.duration}00% + ${ticket.duration - 5}px)` }}
       >
         <small>{ticket.from}:00</small>

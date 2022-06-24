@@ -29,6 +29,7 @@ contract HelloWorld is Ownable {
     uint8 private constant NUM_OF_ROOMS = 20;
     uint8 private constant OPEN_AT = 8;
     uint8 private constant CLOSE_AT = 18;
+    uint8 private constant MAX_DURATION = 4;
     uint8 private constant HOURS_DAILY = CLOSE_AT - OPEN_AT;
 
     bool[HOURS_DAILY][NUM_OF_ROOMS] public slots;
@@ -75,17 +76,17 @@ contract HelloWorld is Ownable {
 
     modifier validTime(uint8 from, uint8 duration) {
         require(OPEN_AT <= from && from <= CLOSE_AT, "Invalid time");
-        require(duration <= HOURS_DAILY, "Duration too long");
+        require(duration <= MAX_DURATION, "Duration too long");
         require(from + duration <= CLOSE_AT, "Ending too late");
         _;
     }
 
-    function bookRoom(
+    function book(
         string memory title,
         string memory room,
         uint8 from,
         uint8 duration
-    ) external validRoom(room) validTime(from, duration) returns (uint256) {
+    ) external validRoom(room) validTime(from, duration) {
         uint8 row = roomToSlotsRow[room];
         uint8 fromCol = from - OPEN_AT;
         uint8 toCol = fromCol + duration;
@@ -114,9 +115,19 @@ contract HelloWorld is Ownable {
         return userToTickets[msg.sender];
     }
 
-    function deleteTicket(uint256 id) external {
+    function removeTicket(uint256 id) external {
         require(userToTickets[msg.sender][id].isActive, "Ticket not found");
+
         userToTickets[msg.sender][id].isActive = false;
+        uint8 row = roomToSlotsRow[userToTickets[msg.sender][id].room];
+        uint8 fromCol = userToTickets[msg.sender][id].from - OPEN_AT;
+        uint8 toCol = fromCol + userToTickets[msg.sender][id].duration;
+
+        // update slots availability
+        for (uint8 col = fromCol; col < toCol; col++) {
+            slots[row][col] = true;
+        }
+
         emit Updated();
     }
 }

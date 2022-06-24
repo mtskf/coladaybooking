@@ -9,7 +9,7 @@ interface PropType {
   save: any;
 }
 
-function TicketModal ({ isActive, cancel, newTicket, save }: PropType) {
+function NewTicketModal ({ isActive, cancel, newTicket, save }: PropType) {
 
   const titleInputRef = useRef() as React.MutableRefObject<HTMLInputElement>;
 
@@ -74,4 +74,4 @@ function TicketModal ({ isActive, cancel, newTicket, save }: PropType) {
   )
 }
 
-export default TicketModal
+export default NewTicketModal
