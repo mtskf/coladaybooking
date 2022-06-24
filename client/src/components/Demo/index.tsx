@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-// import { cloneDeep } from "lodash";
 import useEth from "../../contexts/EthContext/useEth";
 import NoticeNoArtifact from "./NoticeNoArtifact";
 import NoticeWrongNetwork from "./NoticeWrongNetwork";
@@ -8,8 +7,9 @@ import TicketInfoModal from "./TicketInfoModal";
 import TableDragSelect from "./TableDragSelect";
 import rooms from "./RoomNames";
 import { add, format } from "date-fns";
-import { Ticket, Slot } from "types";
+import { Ticket, Slot, Snack } from "types";
 import styles from "./styles.module.scss";
+import { SnackBar } from "./SnackBar";
 
 declare global {
   interface Window {
@@ -28,37 +28,26 @@ const CLOSE_AT = 18;
 const SLOT_LENGTH = CLOSE_AT - OPEN_AT;
 const HOURS = [...Array(SLOT_LENGTH)].map((x, i) => `${i + OPEN_AT}:00`);
 const ROOM_NAMES = rooms;
-
 const TOMORROW = format(add(new Date(), { days: 1 }), 'd MMM, yyyy');
+const DEFAULT_SLOTS = [...Array(ROOM_NAMES.length)].map(() => [...Array(SLOT_LENGTH)].map((x) => {
+  return { selected: false, disabled: false }
+}))
+const DEFAULT_TICKET = { roomId: 0, room: "", from: 0, to: 0, duration: 0, date: "", }
 
 function Demo () {
   const { state } = useEth()
   const { state: { contract, accounts } } = useEth()
-
+  const [slots, setSlots] = useState<Slot[][]>(DEFAULT_SLOTS);
+  const [newTicket, setNewTicket] = useState<Ticket>(DEFAULT_TICKET)
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [newTicketModalShown, setNewTicketModalShown] = useState(false);
+  const [ticketInfoModalShown, setTicketInfoModalShown] = useState(false);
+  const [snack, setSnack] = useState<Snack>({});
+
   const cancelNewEvent = () => {
     resetSelection();
     setNewTicketModalShown(false);
   }
-
-  const [ticketInfoModalShown, setTicketInfoModalShown] = useState(false);
-  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
-
-  const [slots, setSlots] = useState<Slot[][]>([...Array(ROOM_NAMES.length)].map(() => [...Array(SLOT_LENGTH)].map((x) => {
-    return {
-      selected: false,
-      disabled: false,
-    }
-  })));
-
-  const [newTicket, setNewTicket] = useState<Ticket>({
-    roomId: 0,
-    room: "",
-    from: 0,
-    to: 0,
-    duration: 0,
-    date: "",
-  })
 
   const getSlots = async () => {
     // TODO: use try catch to handle error
@@ -126,25 +115,6 @@ function Demo () {
     setSlots(slotsWithTickets);
   }
 
-  // when web3 is mounted, load data and set event listener
-  useEffect(() => {
-    if (!contract) return;
-
-    // initial data load
-    loadSlots();
-
-    // Event listener - when event "Updated" monitored, load data
-    contract.events.Updated()
-      .on("data", loadSlots)
-      .on("error", console.error);
-
-    // remove event listener when unmount
-    return () =>
-      contract.events.Updated().removeListener("data", loadSlots)
-
-  }, [contract]); // eslint-disable-line react-hooks/exhaustive-deps
-
-
   const book = async (title: string) => {
     setNewTicketModalShown(false);
     resetSelection();
@@ -173,6 +143,9 @@ function Demo () {
       slots[row][col + i].booked = true;
     }
     setSlots(slots);
+
+    // show success message
+    setSnack({ message: 'Saved', type: 'success', isActive: true });
   }
 
   const removeTicket = async (ticket: Ticket) => {
@@ -186,7 +159,6 @@ function Demo () {
       // TODO: error handling
       return;
     }
-    console.log('deleted!')
 
     // update slots
     const row = ticket.roomId;
@@ -196,10 +168,14 @@ function Demo () {
       slots[row][col + i].booked = false;
     }
     delete slots[row][col].ticket;
+    setSlots(slots);
 
     // close modal
     setTicketInfoModalShown(false);
-    // if (selectedTicket) setSelectedTicket(null);
+    if (selectedTicket) setSelectedTicket(null);
+
+    // show success message
+    setSnack({ message: 'Event deleted!', type: 'success', isActive: true });
   }
 
   const handleSelectSlots = async (slots: any[], selected: any[]) => {
@@ -220,10 +196,7 @@ function Demo () {
 
   const resetSelection = () => {
     const newSlots = slots.map(row => row.map(slot => {
-      return {
-        ...slot,
-        selected: false
-      };
+      return { ...slot, selected: false };
     }));
     setSlots(newSlots);
   };
@@ -236,7 +209,25 @@ function Demo () {
     setTicketInfoModalShown(true);
   }
 
-  const demo =
+  // when web3 is mounted, load data and set event listener
+  useEffect(() => {
+    if (!contract) return;
+
+    // initial data load
+    loadSlots();
+
+    // Event listener - when event "Updated" monitored, load data
+    contract.events.Updated()
+      .on("data", loadSlots)
+      .on("error", console.error);
+
+    // remove event listener when unmount
+    return () =>
+      contract.events.Updated().removeListener("data", loadSlots)
+
+  }, [contract]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const eventTable =
     <>
       <h1>COKE ROOMS {TOMORROW}</h1>
       <div className={styles.tableContainer}>
@@ -253,9 +244,7 @@ function Demo () {
           onInput={(event: Event) => console.log("event", event)}
           onClickTicket={handleClickTicket}
         />
-
       </div>
-
 
       <NewTicketModal
         isActive={newTicketModalShown}
@@ -270,6 +259,8 @@ function Demo () {
         remove={removeTicket}
         close={() => setTicketInfoModalShown(false)}
       />
+
+      <SnackBar snack={snack} setSnack={setSnack} />
     </>
 
   return (
@@ -277,7 +268,7 @@ function Demo () {
       {
         !state.artifact ? <NoticeNoArtifact /> :
           !state.contract ? <NoticeWrongNetwork /> :
-            demo
+            eventTable
       }
     </div>
   )

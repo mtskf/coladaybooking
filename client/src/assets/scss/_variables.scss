@@ -25,6 +25,7 @@ $primary: greenyellow !default;
 $greenyellow: greenyellow !default;
 $green: green !default;
 $lime: lime !default;
+$red: #be185d !default;
 
 $text: $slate200;
 $text-strong: $slate100;
@@ -124,9 +125,9 @@ $tile-spacing: 1.5rem;
 
 // Misc
 $easing: ease-out !default;
-$radius-small: 2px !default;
-$radius: 0.25rem;
-$radius-large: 6px !default;
+$radius-small: 0.125rem !default;
+$radius: 0.25rem !default;
+$radius-large: 0.4rem !default;
 $radius-rounded: 290486px !default;
 $speed: 86ms !default;
 

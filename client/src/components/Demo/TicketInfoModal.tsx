@@ -30,7 +30,6 @@ function TicketInfoModal ({ isActive, ticket, remove, close }: PropType) {
       <div className={styles.modalBg} onClick={close}></div>
       <div className={styles.modalContent}>
 
-        <label htmlFor="">Event title:</label>
         <h3>{ticket?.title}</h3>
         <small>{ticket?.date}&nbsp;&nbsp;{ticket?.from}:00 to {ticket?.to}:00&nbsp;&nbsp;&nbsp;&nbsp;Room {ticket?.room}</small>
 

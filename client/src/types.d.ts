@@ -23,3 +23,9 @@ export interface Slot {
   booked?: boolean;
   ticket?: Booking;
 }
+
+export interface Snack {
+  message?: string;
+  type?: string;
+  isActive?: boolean;
+}

@@ -1,6 +1,6 @@
 @import 'assets/scss/_variables';
 
-$modal-content-width: 24rem;
+$modal-content-width: 22rem;
 $modal-overlay-bgColor: rgba($slate800, 0.85);
 $modal-content-bgColor: $slate900;
 
@@ -98,11 +98,11 @@ $modal-content-bgColor: $slate900;
     width: 100%;
     height: calc(100% - 4px);
     padding: 0.2rem 0.4rem 0;
-    background-color: rgba($greenyellow, 0.2);
+    background-color: rgba($greenyellow, 0.1);
     border: 1px solid $greenyellow;
     border-left-width: 0.3rem;
     border-radius: 0.25rem;
-    box-shadow: 0 0.25rem 1rem rgba($greenyellow, 0.2);
+    box-shadow: 0 0.25rem 1rem rgba($greenyellow, 0.1);
     color: $greenyellow;
     line-height: 1.1;
     cursor: pointer;
@@ -110,7 +110,7 @@ $modal-content-bgColor: $slate900;
     &:hover {
       z-index: 10;
       border-color: $lime;
-      background-color: rgba($greenyellow, 0.3);
+      background-color: rgba($greenyellow, 0.2);
       box-shadow: 0 0.25rem 1rem rgba($greenyellow, 0.3);
     }
 
@@ -130,6 +130,28 @@ $modal-content-bgColor: $slate900;
   }
 }
 
+.snackBar {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  background-color: green;
+  font-size: 0.8rem;
+  border-radius: $radius;
+  font-weight: bold;
+  &[data-type="success"] {
+    background-color: green;
+  }
+  &[data-type="error"] {
+    background-color: $red;
+  }
+  & > svg {
+    margin-right: 0.5rem;
+    width: 1.25rem;
+    height: 1.2
+    fwb5rem;
+  }
+  // font-weight: bold;
+}
 
 // :global {
 //   button.is-primary {
@@ -193,6 +215,8 @@ $modal-content-bgColor: $slate900;
     background-color: transparent;
     height: auto;
     padding: 0.25rem 0;
+        margin-bottom: 0.75rem;
+
     color: #fff;
     font-weight: bold;
     border-radius: 0;
@@ -233,7 +257,6 @@ $modal-content-bgColor: $slate900;
 
   small {
     display: block;
-    margin-top: 0.75rem;
     font-size: 0.825rem;
   }
 
@@ -263,6 +286,10 @@ $modal-content-bgColor: $slate900;
     &:hover {
       background-color: lime;
     }
+  }
+
+  h3 {
+    margin-bottom: 0.25rem;
   }
 
 }
