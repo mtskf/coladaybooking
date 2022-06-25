@@ -42,6 +42,7 @@ contract HelloWorld is Ownable {
         string room;
         uint8 from;
         uint8 duration;
+        bool isEncrypted;
         bool isActive;
     }
     // Ticket[] public tickets;
@@ -85,7 +86,8 @@ contract HelloWorld is Ownable {
         string memory title,
         string memory room,
         uint8 from,
-        uint8 duration
+        uint8 duration,
+        bool isEncrypted
     ) external validRoom(room) validTime(from, duration) {
         uint8 row = roomToSlotsRow[room];
         uint8 fromCol = from - OPEN_AT;
@@ -104,7 +106,7 @@ contract HelloWorld is Ownable {
         // create a new ticket
         uint256 id = userToTickets[msg.sender].length;
         userToTickets[msg.sender].push(
-            Ticket(id, title, room, from, duration, true)
+            Ticket(id, title, room, from, duration, isEncrypted, true)
         );
 
         // emit event

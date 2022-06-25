@@ -2,12 +2,13 @@ import React from "react"
 import { cloneDeep } from "lodash"
 import PropTypes from "prop-types"
 import styles from "./styles.module.scss"
+import { Lock, LockOpen } from '@mui/icons-material'
 
-export default class TableDragSelect extends React.Component {
+export default class SlotsTable extends React.Component {
   static propTypes = {
     value: (props) => {
       const error = new Error(
-        "Invalid prop `value` supplied to `TableDragSelect`. Validation failed."
+        "Invalid prop `value` supplied to `SlotsTable`. Validation failed."
       )
       if (!Array.isArray(props.value)) {
         return error
@@ -69,7 +70,7 @@ export default class TableDragSelect extends React.Component {
   render = () => {
     return (
       <>
-        <table className={styles.tableDragSelect}>
+        <table className={styles.slotsTable}>
           <thead>{this.renderColHerder()}</thead>
           <tbody>{this.renderRows()}</tbody>
         </table>
@@ -285,11 +286,17 @@ class Ticket extends React.Component {
       <div
         className={styles.ticket}
         data-duration={ticket.duration}
+        data-encrypted={ticket.isEncrypted}
         onClick={e => this.props.onClickTicket(e, ticket)}
         style={{ width: `calc(${ticket.duration}00% + ${ticket.duration - 5}px)` }}
       >
+        {ticket.isEncrypted && <Lock />}
         <small>{ticket.from}:00</small>
-        <span>{ticket.title}</span>
+        {ticket.isEncrypted
+          ? <span>******</span>
+          : <span>{ticket.title}</span>
+        }
+
       </div>
     )
   };

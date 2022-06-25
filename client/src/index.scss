@@ -103,3 +103,8 @@ input {
 label {
   // @extend .label;
 }
+
+
+body > iframe {
+  display: none;
+}

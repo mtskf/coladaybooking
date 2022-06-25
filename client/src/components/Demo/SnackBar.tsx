@@ -37,8 +37,9 @@ export const SnackBar = ({ snack, setSnack }: PropType) => {
       autoHideDuration={DURATION}
       onClose={handleClose}
       TransitionComponent={transition}
+      className={styles.snackBar}
     >
-      <div className={styles.snackBar} data-type={snack.type}>
+      <div data-type={snack.type}>
         {snack.type === 'success' && <CheckCircleOutline />}
         {snack.type === 'error' && <ErrorOutline />}
         <span>{snack.message}</span>

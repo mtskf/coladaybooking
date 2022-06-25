@@ -1,6 +1,6 @@
 @import 'assets/scss/_variables';
 
-$modal-content-width: 22rem;
+$modal-content-width: 24rem;
 $modal-overlay-bgColor: rgba($slate800, 0.85);
 $modal-content-bgColor: $slate900;
 
@@ -11,7 +11,7 @@ $modal-content-bgColor: $slate900;
 }
 
 
-.tableDragSelect {
+.slotsTable {
   width: 100%;
   margin: 0 auto;
   table-layout: fixed;
@@ -23,6 +23,7 @@ $modal-content-bgColor: $slate900;
     color: $slate400;
     font-size: 0.8rem;
     font-weight: normal;
+
     &:first-child {
       width: 4rem;
     }
@@ -38,18 +39,21 @@ $modal-content-bgColor: $slate900;
 
   tbody {
     tr:hover {
-      & > td.enabled:not(.selecting) {
+      &>td.enabled:not(.selecting) {
         background-color: darken($slate900, 10%);
       }
-      & > th {
+
+      &>th {
         color: $greenyellow;
         background-color: darken($slate900, 10%);
       }
     }
   }
+
   th {
     transition: all 0.4s ease;
   }
+
   td {
     text-align: center;
     text-overflow: ellipsis;
@@ -89,67 +93,85 @@ $modal-content-bgColor: $slate900;
       overflow: visible;
     }
   }
+}
 
-  .ticket {
+.ticket {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  box-sizing: border-box;
+  width: 100%;
+  height: calc(100% - 4px);
+  padding: 0.2rem 0.4rem 0;
+  background-color: rgba($greenyellow, 0.1);
+  border: 1px solid $greenyellow;
+  border-left-width: 0.3rem;
+  border-radius: 0.25rem;
+  box-shadow: 0 0.25rem 1rem rgba($greenyellow, 0.1);
+  color: $greenyellow;
+  line-height: 1.1;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    z-index: 10;
+    border-color: $lime;
+    background-color: rgba($greenyellow, 0.2);
+    box-shadow: 0 0.25rem 1rem rgba($greenyellow, 0.3);
+  }
+
+  &>svg {
     position: absolute;
-    top: 2px;
-    left: 2px;
-    box-sizing: border-box;
-    width: 100%;
-    height: calc(100% - 4px);
-    padding: 0.2rem 0.4rem 0;
-    background-color: rgba($greenyellow, 0.1);
-    border: 1px solid $greenyellow;
-    border-left-width: 0.3rem;
-    border-radius: 0.25rem;
-    box-shadow: 0 0.25rem 1rem rgba($greenyellow, 0.1);
-    color: $greenyellow;
-    line-height: 1.1;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    &:hover {
-      z-index: 10;
-      border-color: $lime;
-      background-color: rgba($greenyellow, 0.2);
-      box-shadow: 0 0.25rem 1rem rgba($greenyellow, 0.3);
-    }
+    top: 0.25rem;
+    right: 0.25rem;
+    width: 0.65rem;
+    height: 0.65rem;
+  }
 
-    & > small {
-      display: block;
-      font-size: 0.625rem;
-    }
+  &>small {
+    display: block;
+    font-size: 0.625rem;
+    margin-bottom: 0.1rem;
+  }
 
-    & > span {
-      overflow: hidden;
-      display: -webkit-box;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 2;
-      font-weight: bold;
-      font-size: 0.8rem;
-    }
+  &>span {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    font-weight: bold;
+    font-size: 0.8rem;
   }
 }
 
 .snackBar {
-  display: flex;
-  align-items: center;
-  padding: 0.5rem 0.75rem;
-  background-color: green;
-  font-size: 0.8rem;
-  border-radius: $radius;
-  font-weight: bold;
-  &[data-type="success"] {
+  z-index: $zindex-alerts;
+
+  &>div {
+    display: flex;
+    align-items: center;
     background-color: green;
+    border-radius: $radius;
+    padding: 0.75rem 1rem;
+    font-size: 0.8rem;
+    font-weight: bold;
+
+    &[data-type="success"] {
+      background-color: green;
+    }
+
+    &[data-type="error"] {
+      background-color: $red;
+    }
   }
-  &[data-type="error"] {
-    background-color: $red;
-  }
-  & > svg {
-    margin-right: 0.5rem;
+
+
+  svg {
+    margin-right: 0.75rem;
     width: 1.25rem;
-    height: 1.2
-    fwb5rem;
+    height: 1.2 fwb5rem;
   }
+
   // font-weight: bold;
 }
 
@@ -169,7 +191,7 @@ $modal-content-bgColor: $slate900;
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 99999999;
+  z-index: $zindex-modal;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -193,9 +215,24 @@ $modal-content-bgColor: $slate900;
     position: relative;
     z-index: 2;
     width: $modal-content-width;
+    max-width: 90vw;
     padding: 2rem;
     border-radius: $radius-large;
     background-color: $modal-content-bgColor;
+  }
+
+  &Icon {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    color: $slate600;
+    &[data-encryption="true"] {
+      color: $primary;
+    }
+    & > svg {
+      width: 1rem;
+      height: 1rem;
+    }
   }
 
   form {
@@ -211,12 +248,10 @@ $modal-content-bgColor: $slate900;
   }
 
   input {
-    // background-color: darken($slate900, 5%)
     background-color: transparent;
     height: auto;
     padding: 0.25rem 0;
-        margin-bottom: 0.75rem;
-
+    margin: 0 0 1rem;
     color: #fff;
     font-weight: bold;
     border-radius: 0;
@@ -257,13 +292,14 @@ $modal-content-bgColor: $slate900;
 
   small {
     display: block;
+    margin-bottom: 1rem;
     font-size: 0.825rem;
   }
 
   :global .buttons {
     display: flex;
     justify-content: space-between;
-    margin-top: 1.5rem;
+    margin-top: 2.5rem;
   }
 
   button {
@@ -282,6 +318,7 @@ $modal-content-bgColor: $slate900;
       border-color: $greenyellow;
     }
   }
+
   :global button.is-primary {
     &:hover {
       background-color: lime;
@@ -291,5 +328,63 @@ $modal-content-bgColor: $slate900;
   h3 {
     margin-bottom: 0.25rem;
   }
+}
 
+
+.customSwitch {
+  display: flex !important;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  margin: 0.25rem 0 !important;
+
+  :global {
+    .MuiSwitch {
+      &-root {
+        width: 42px;
+        height: 26px;
+        padding: 0;
+        margin-left: 0.5rem;
+      }
+
+      &-switchBase {
+        padding: 0;
+        margin: 2px;
+        transition-duration: 0.3s;
+        color: $slate300;
+
+        &.Mui-checked {
+          transform: translateX(16px) !important;
+          color: #fff;
+
+          &+.MuiSwitch-track {
+            background-color: $lime;
+            opacity: 1 !important;
+            border: 0;
+          }
+        }
+
+        &.Mui-focusVisibe .MuiSwitch-thumb {
+          color: red;
+          border: 6px solid blue;
+        }
+      }
+
+      &-thumb {
+        box-sizing: border-box;
+        width: 22px;
+        height: 22px;
+      }
+
+      &-track {
+        border-radius: 13px;
+        background-color: $slate700;
+        opacity: 1;
+        transition: all 0.5s ease;
+      }
+    }
+    .MuiFormControlLabel-label {
+      flex-grow: 1;
+      flex-shrink: 1;
+    }
+  }
 }

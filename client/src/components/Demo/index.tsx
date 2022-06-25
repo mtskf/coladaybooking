@@ -4,12 +4,16 @@ import NoticeNoArtifact from "./NoticeNoArtifact";
 import NoticeWrongNetwork from "./NoticeWrongNetwork";
 import NewTicketModal from "./NewTicketModal";
 import TicketInfoModal from "./TicketInfoModal";
-import TableDragSelect from "./TableDragSelect";
+import SlotsTable from "./SlotsTable";
 import rooms from "./RoomNames";
 import { add, format } from "date-fns";
 import { Ticket, Slot, Snack } from "types";
 import styles from "./styles.module.scss";
 import { SnackBar } from "./SnackBar";
+
+import { bufferToHex } from "ethereumjs-util";
+import { encrypt } from "@metamask/eth-sig-util";
+
 
 declare global {
   interface Window {
@@ -34,6 +38,22 @@ const DEFAULT_SLOTS = [...Array(ROOM_NAMES.length)].map(() => [...Array(SLOT_LEN
 }))
 const DEFAULT_TICKET = { roomId: 0, room: "", from: 0, to: 0, duration: 0, date: "", }
 
+const encryptWithPublicKey = (publicKey: Buffer, message: string) => {
+  return bufferToHex(
+    Buffer.from(
+      JSON.stringify(
+        encrypt({
+          publicKey: publicKey.toString('base64'),
+          data: message,
+          version: 'x25519-xsalsa20-poly1305',
+        })
+      ),
+      'utf8'
+    )
+  );
+}
+
+
 function Demo () {
   const { state } = useEth()
   const { state: { contract, accounts } } = useEth()
@@ -43,11 +63,7 @@ function Demo () {
   const [newTicketModalShown, setNewTicketModalShown] = useState(false);
   const [ticketInfoModalShown, setTicketInfoModalShown] = useState(false);
   const [snack, setSnack] = useState<Snack>({});
-
-  const cancelNewEvent = () => {
-    resetSelection();
-    setNewTicketModalShown(false);
-  }
+  const [publicKey, setPublicKey] = useState<Buffer | undefined>();
 
   const getSlots = async () => {
     // TODO: use try catch to handle error
@@ -61,27 +77,39 @@ function Demo () {
     return slots;
   }
 
-  const getTickets = async () => {
+  const getTickets = async (): Promise<Ticket[]> => {
     // TODO: use try catch to handle error
     const res = await contract.methods.getTickets().call({ from: accounts[0] })
 
     if (!res || !res.length) return [];
 
     const activeTickets = res.filter((item: any) => item.isActive).map((item: any) => {
-      const { title, room } = item;
+      const { title, room, isEncrypted } = item;
+
+      // await window.ethereum
+      //   .request({
+      //     method: 'eth_decrypt',
+      //     params: [encryptedTitle, accounts[0]],
+      //   })
+      //   .then((decryptedMessage: string) => {
+      //     console.log('The decrypted message is:', decryptedMessage)
+      //     title = decryptedMessage;
+      //   })
+      //   .catch((error: Error) => console.log(error.message));
+
       const id = Number(item.id);
       const from = Number(item.from);
       const duration = Number(item.duration);
       const roomId = ROOM_NAMES.indexOf(room);
       const to = from + duration;
       const date = TOMORROW;
-      return { id, title, room, roomId, from, to, duration, date };
+      return { id, title, room, roomId, from, to, duration, date, isEncrypted };
     });
 
     return activeTickets;
   }
 
-  const setTicketsToSlots = (slots: Slot[][], tickets: Ticket[]) => {
+  const setSlotsAndTickets = (slots: Slot[][], tickets: Ticket[]) => {
     // clear user's tickets data from slots
     for (const row of slots) {
       for (const slot of row) {
@@ -105,17 +133,21 @@ function Demo () {
         slot.booked = true;
       }
     }
-    return slots;
+    setSlots(slots);
   }
 
   const loadSlots = async () => {
     const slots = await getSlots();
     const tickets = await getTickets();
-    const slotsWithTickets = setTicketsToSlots(slots, tickets);
-    setSlots(slotsWithTickets);
+    setSlotsAndTickets(slots, tickets);
   }
 
-  const book = async (title: string) => {
+  const cancelNewTicket = () => {
+    resetSelection();
+    setNewTicketModalShown(false);
+  }
+
+  const saveTicket = async (title: string, isEncrypting: boolean) => {
     setNewTicketModalShown(false);
     resetSelection();
     if (newTicket.room === "") {
@@ -123,8 +155,20 @@ function Demo () {
       return;
     }
     const { roomId, room, from, duration } = newTicket;
+
+    if (isEncrypting) {
+      try {
+        title = encryptWithPublicKey(publicKey!, title);
+      } catch (err) {
+        setSnack({ message: 'Error - Failed to encrypt... Try later.', type: 'error', isActive: true });
+        return;
+      }
+    }
+
+    const isEncrypted = isEncrypting;
+
     try {
-      const res = await contract.methods.book(title, room, from, duration).send({ from: accounts[0] })
+      const res = await contract.methods.book(title, room, from, duration, isEncrypted).send({ from: accounts[0] })
       if (res.status === '0x0') {
         throw new Error('Transaction failed');
       }
@@ -137,7 +181,7 @@ function Demo () {
     // update slots
     const row = roomId;
     const col = from - OPEN_AT;
-    slots[row][col].ticket = { title, ...newTicket };
+    slots[row][col].ticket = { title, ...newTicket, isEncrypted };
     for (let i = 0; i < duration; i++) {
       slots[row][col + i].disabled = true;
       slots[row][col + i].booked = true;
@@ -149,7 +193,6 @@ function Demo () {
   }
 
   const removeTicket = async (ticket: Ticket) => {
-    console.log('remove ticket: ', ticket);
     try {
       const res = await contract.methods.removeTicket(ticket.id).send({ from: accounts[0] })
       if (res.status === '0x0') {
@@ -179,7 +222,7 @@ function Demo () {
   }
 
   const handleSelectSlots = async (slots: any[], selected: any[]) => {
-    setSlots(slots)
+    setSlots(slots); // update selected slots
 
     const roomId = selected[0].row;
     const room = ROOM_NAMES[selected[0].row];
@@ -187,8 +230,9 @@ function Demo () {
     const duration = selected.length;
     const to = from + duration;
     const date = TOMORROW;
+    const isEncrypted = false;
 
-    setNewTicket({ roomId, room, from, to, duration, date })
+    setNewTicket({ roomId, room, from, to, duration, date, isEncrypted })
 
     // showDialog
     setNewTicketModalShown(true);
@@ -203,15 +247,34 @@ function Demo () {
 
   const handleClickTicket = (e: Event, ticket: Ticket) => {
     if (!ticket || ticket.id === undefined) return
-    // TODO: tap to show detail, delete option
-    console.log('Ticket clicked: ', ticket)
     setSelectedTicket(ticket);
     setTicketInfoModalShown(true);
   }
 
+  const getPublicKey = async () => {
+    if (publicKey) return true;
+
+    try {
+      const keyB64 = await window.ethereum.request({
+        method: 'eth_getEncryptionPublicKey',
+        params: [accounts[0]],
+      })
+      setPublicKey(Buffer.from(keyB64, 'base64'));
+    } catch (err) {
+      console.error(err)
+      setSnack({ message: 'Error - Please approve the public key access via MetaMask!', type: 'error', isActive: true });
+      return false;
+    }
+
+    return true;
+  }
+
   // when web3 is mounted, load data and set event listener
   useEffect(() => {
-    if (!contract) return;
+    if (!accounts || !accounts[0]) return;
+
+    // reset publicKey
+    setPublicKey(undefined);
 
     // initial data load
     loadSlots();
@@ -225,13 +288,13 @@ function Demo () {
     return () =>
       contract.events.Updated().removeListener("data", loadSlots)
 
-  }, [contract]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [accounts]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const eventTable =
     <>
       <h1>COKE ROOMS {TOMORROW}</h1>
       <div className={styles.tableContainer}>
-        <TableDragSelect
+        <SlotsTable
           value={slots}
           rows={ROOM_NAMES.length}
           cols={SLOT_LENGTH}
@@ -248,9 +311,10 @@ function Demo () {
 
       <NewTicketModal
         isActive={newTicketModalShown}
-        cancel={cancelNewEvent}
+        cancel={cancelNewTicket}
         newTicket={newTicket}
-        save={book}
+        save={saveTicket}
+        getPublicKey={getPublicKey}
       />
 
       <TicketInfoModal
