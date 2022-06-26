@@ -52,7 +52,7 @@ contract("ColaDayBooking", (accounts) => {
       try {
         await instance.book("test", "C05", 8, 6, false)
       } catch (err) {
-        const errorMessage = "Duration too long"
+        const errorMessage = "Invalid duration"
         assert.equal(err.reason, errorMessage, "Error as expected")
         return
       }

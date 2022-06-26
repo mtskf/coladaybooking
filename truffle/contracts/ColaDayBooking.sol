@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.9.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+
+// import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 /**
  * @title ColaDayBooking
@@ -9,7 +10,7 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
  * with ETH
  */
 contract ColaDayBooking is Ownable {
-    using SafeMath for uint8;
+    // using SafeMath for uint8;
 
     string[] private ROOMS = [
         "C01",
@@ -107,7 +108,10 @@ contract ColaDayBooking is Ownable {
      */
     modifier validTime(uint8 _from, uint8 _duration) {
         require(OPEN_AT <= _from && _from <= CLOSE_AT, "Invalid time");
-        require(_duration <= MAX_DURATION, "Duration too long");
+        require(
+            0 <= _duration && _duration <= MAX_DURATION,
+            "Invalid duration"
+        );
         require(_from + _duration <= CLOSE_AT, "Ending too late");
         _;
     }
