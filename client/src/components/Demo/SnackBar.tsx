@@ -5,7 +5,6 @@ import styles from "./styles.module.scss";
 import { AutoAwesome, Error } from '@mui/icons-material';
 import { Snack } from 'types';
 
-
 interface PropType {
   snack: Snack;
   setSnack: (snack: Snack) => void;
@@ -15,7 +14,7 @@ const DELAY = 500;
 const DURATION = 5000;
 const transition = (props: SlideProps) => <Slide {...props} direction="up" />;
 
-export const SnackBar = ({ snack, setSnack }: PropType) => {
+const SnackBar = ({ snack, setSnack }: PropType) => {
   const [isActive, setIsActive] = useState(false);
 
   const handleClose = (event: React.SyntheticEvent | Event, reason?: string) => {
@@ -47,3 +46,4 @@ export const SnackBar = ({ snack, setSnack }: PropType) => {
     </Snackbar>
   );
 };
+export default SnackBar;

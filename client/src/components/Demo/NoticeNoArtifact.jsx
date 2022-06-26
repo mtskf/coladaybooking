@@ -1,4 +1,4 @@
-// import { useState, useEffect } from "react"
+// import { useEffect } from "react"
 
 // function isMobileDevice () {
 //   return 'ontouchstart' in window || 'onmsgesturechange' in window
@@ -22,8 +22,26 @@
 
 
 
+
 function NoticeNoArtifact () {
   // const [userAddress, setUserAddress] = useState("")
+  // useEffect(() => {
+  //   const init = async () => {
+  //     if (window.ethereum) {
+  //       try {
+  //         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
+  //         console.log(accounts)
+  //       } catch (error) {
+  //         if (error.code === 4001) {
+  //           // User rejected request
+  //         }
+
+  //       }
+  //     }
+  //   }
+  //   init()
+  // }, [])
+
 
   return (
     <>

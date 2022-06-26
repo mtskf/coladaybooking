@@ -24,7 +24,7 @@ function TicketInfoModal ({ isActive, ticket, remove, close, decryptTicketTitle 
 
     return () => document.removeEventListener('keydown', keyDownHandler);
 
-  }, [isActive]);  // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isActive]);  // eslint-disable-line
 
   const decrypt = () => {
     decryptTicketTitle(ticket);

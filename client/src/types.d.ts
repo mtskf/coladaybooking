@@ -11,14 +11,6 @@ export interface Ticket {
   decryptedTitle?: string;
 }
 
-interface BookedEvent {
-  title: string;
-  roomName: string;
-  timeFrom: number;
-  duration: number;
-  user: string;
-}
-
 export interface Slot {
   selected: boolean;
   disabled: boolean;

@@ -1,19 +1,17 @@
 import { useState, useEffect } from "react";
+import { bufferToHex } from "ethereumjs-util";
+import { encrypt } from "@metamask/eth-sig-util";
+import { add, format } from "date-fns";
 import useEth from "../../contexts/EthContext/useEth";
 import NoticeNoArtifact from "./NoticeNoArtifact";
 import NoticeWrongNetwork from "./NoticeWrongNetwork";
 import NewTicketModal from "./NewTicketModal";
 import TicketInfoModal from "./TicketInfoModal";
 import SlotsTable from "./SlotsTable";
-import rooms from "./RoomNames";
-import { add, format } from "date-fns";
-import { Ticket, Slot, Snack } from "types";
+import SnackBar from "./SnackBar";
 import styles from "./styles.module.scss";
-import { SnackBar } from "./SnackBar";
-
-import { bufferToHex } from "ethereumjs-util";
-import { encrypt } from "@metamask/eth-sig-util";
-
+import rooms from "./RoomNames";
+import { Ticket, Slot, Snack } from "types";
 
 declare global {
   interface Window {
@@ -67,37 +65,57 @@ function RoomTimeTable () {
   const [snack, setSnack] = useState<Snack>({});
 
   const getSlots = async () => {
-    // TODO: use try catch to handle error
-    const res = await contract.methods.getSlots().call({ from: accounts[0] })
-    const slots = res.map((row: any, i: number) => row.map((val: boolean) => {
-      return {
-        selected: false,
-        disabled: !val,
+    try {
+      const res = await contract.methods.getSlots().call({ from: accounts[0] });
+
+      if (!res || res.status === '0x0') {
+        throw new Error('Booking failed');
       }
-    }));
-    return slots;
+
+      const slots = res.map((row: any, i: number) => row.map((val: boolean) => {
+        return {
+          selected: false,
+          disabled: !val,
+        }
+      }));
+      return slots;
+    } catch (err) {
+      console.error(err);
+      setSnack({ message: 'Error - Failed to retrieve data... Try reloading the page.', type: 'error', isActive: true });
+      return;
+    }
   }
 
   const getTickets = async () => {
-    // TODO: use try catch to handle error
-    const res = await contract.methods.getTickets().call({ from: accounts[0] })
+    try {
+      const res = await contract.methods.getTickets().call({ from: accounts[0] })
 
-    if (!res || !res.length) return [];
+      if (!res || res.status === '0x0') {
+        throw new Error('Booking failed');
+      }
 
-    // filter out deleted events
-    const activeTickets = res.filter((ticket: any) => ticket.isActive).map((ticket: any) => {
-      const { title, room, isEncrypted } = ticket;
-      const id = Number(ticket.id);
-      const from = Number(ticket.from);
-      const duration = Number(ticket.duration);
-      const roomId = ROOM_NAMES.indexOf(room);
-      const to = from + duration;
-      const date = TOMORROW;
-      const decryptedTitle = decryptedTitlesCache[id];
-      return { id, title, room, roomId, from, to, duration, date, isEncrypted, decryptedTitle };
-    });
+      if (!res.length) return [];
 
-    return activeTickets;
+      // filter out deleted events
+      const activeTickets = res.filter((ticket: any) => ticket.isActive).map((ticket: any) => {
+        const { title, room, isEncrypted } = ticket;
+        const id = Number(ticket.id);
+        const from = Number(ticket.from);
+        const duration = Number(ticket.duration);
+        const roomId = ROOM_NAMES.indexOf(room);
+        const to = from + duration;
+        const date = TOMORROW;
+        const decryptedTitle = decryptedTitlesCache[id];
+        return { id, title, room, roomId, from, to, duration, date, isEncrypted, decryptedTitle };
+      });
+
+      return activeTickets;
+
+    } catch (err) {
+      console.error(err);
+      setSnack({ message: 'Error - Failed to retrieve data... Try reloading the page.', type: 'error', isActive: true });
+      return;
+    }
   }
 
   const setSlotsAndTickets = (slots: Slot[][], tickets: Ticket[]) => {
@@ -170,8 +188,8 @@ function RoomTimeTable () {
     // send event data to contract
     try {
       const res = await contract.methods.book(title, room, from, duration, isEncrypted).send({ from: accounts[0] })
-      if (res.status === '0x0') {
-        throw new Error('Transaction failed');
+      if (!res || res.status === '0x0') {
+        throw new Error('Booking failed');
       }
     } catch (err) {
       console.error(err);
@@ -202,8 +220,9 @@ function RoomTimeTable () {
       if (res.status === '0x0') {
         throw new Error('Transaction failed');
       }
-    } catch (error) {
-      // TODO: error handling
+    } catch (err) {
+      console.error(err);
+      setSnack({ message: 'Error - Failed to delete event... Try later.', type: 'error', isActive: true });
       return;
     }
 

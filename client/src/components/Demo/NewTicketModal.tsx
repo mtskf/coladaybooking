@@ -47,7 +47,7 @@ function NewTicketModal ({ isActive, cancel, newTicket, save, getPublicKey }: Pr
     titleInputRef.current.addEventListener('keydown', keyDownHandler);
 
     return () => {
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+      // eslint-disable-next-line
       titleInputRef.current.removeEventListener('keydown', keyDownHandler);
     };
   }, [isActive]); // eslint-disable-line
