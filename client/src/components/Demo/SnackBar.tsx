@@ -18,7 +18,6 @@ const SnackBar = ({ snack, setSnack }: PropType) => {
   const [isActive, setIsActive] = useState(false);
 
   const handleClose = (event: React.SyntheticEvent | Event, reason?: string) => {
-    // if (reason === 'clickaway') return;
     setSnack({ ...snack, isActive: false, });
     setIsActive(false);
   };

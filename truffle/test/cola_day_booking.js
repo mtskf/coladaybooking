@@ -1,42 +1,9 @@
-const HelloWorld = artifacts.require("HelloWorld")
+const ColaDayBooking = artifacts.require("ColaDayBooking")
 
-contract("HelloWorld", (accounts) => {
+contract("ColaDayBooking", (accounts) => {
   let instance
   beforeEach(async () => {
-    instance = await HelloWorld.new()
-  })
-  xcontext("Hello world", async () => {
-    it("return Hello, world", async () => {
-      const expected = "Hello, world"
-      const ret = await instance.helloworld()
-      assert.equal(ret, expected, "Hello, world was returned!")
-    })
-    it("set text and return Hello, Dapp", async () => {
-      const expected = "Hello, DApp"
-      await instance.setHelloWorld(expected)
-      const ret = await helloworld.helloworld()
-      assert.equal(ret, expected, "Hello, DApp was returned!")
-    })
-    it("return the address of owner", async () => {
-      const owner = await instance.owner()
-      assert(owner, "the current owner")
-    })
-    it("is deployed account?", async () => {
-      const owner = await instance.owner()
-      const expected = accounts[0]
-      assert.equal(owner, expected, "owner account == deployed account")
-    })
-    it("Non owner cannot set text", async () => {
-      const expected = instance.helloworld() // 期待する値
-      try {
-        await instance.setHelloWorld("Another account", { from: accounts[1] }) // 他のアカウントでテキストを設定
-      } catch (err) {
-        const errorMessage = "Ownable: caller is not the owner"
-        assert.equal(err.reason, errorMessage, "Cannot set text")
-        return
-      }
-      assert(false, "Cannot set text")
-    })
+    instance = await ColaDayBooking.new()
   })
   context("Booking", async () => {
     it("Book a room1", async () => {

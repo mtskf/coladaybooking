@@ -2,7 +2,7 @@
 pragma solidity >=0.4.22 <0.9.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract HelloWorld is Ownable {
+contract ColaDayBooking is Ownable {
     string[] private rooms = [
         "C01",
         "C02",
