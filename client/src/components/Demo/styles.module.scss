@@ -302,6 +302,11 @@ $modal-content-bgColor: $slate900;
     font-weight: bold;
     font-size: 0.8rem;
     transition: all 0.2s ease;
+    & > svg {
+      width: 1rem;
+      height: 1rem;
+      margin: -0.2rem 0.2rem -0.2rem -0.2rem;
+    }
   }
 
   :global button.is-simple {
