@@ -38,6 +38,9 @@ const DEFAULT_SLOTS = [...Array(ROOM_NAMES.length)].map(() => [...Array(SLOT_LEN
 }))
 const DEFAULT_TICKET = { roomId: 0, room: "", from: 0, to: 0, duration: 0, date: "", }
 
+const decryptedTitlesCache: string[] = [];
+let publicKey: Buffer | undefined;
+
 const encryptWithPublicKey = (publicKey: Buffer, message: string) => {
   return bufferToHex(
     Buffer.from(
@@ -53,8 +56,7 @@ const encryptWithPublicKey = (publicKey: Buffer, message: string) => {
   );
 }
 
-
-function Demo () {
+function RoomTimeTable () {
   const { state } = useEth()
   const { state: { contract, accounts } } = useEth()
   const [slots, setSlots] = useState<Slot[][]>(DEFAULT_SLOTS);
@@ -63,7 +65,6 @@ function Demo () {
   const [newTicketModalShown, setNewTicketModalShown] = useState(false);
   const [ticketInfoModalShown, setTicketInfoModalShown] = useState(false);
   const [snack, setSnack] = useState<Snack>({});
-  const [publicKey, setPublicKey] = useState<Buffer | undefined>();
 
   const getSlots = async () => {
     // TODO: use try catch to handle error
@@ -77,40 +78,30 @@ function Demo () {
     return slots;
   }
 
-  const getTickets = async (): Promise<Ticket[]> => {
+  const getTickets = async () => {
     // TODO: use try catch to handle error
     const res = await contract.methods.getTickets().call({ from: accounts[0] })
 
     if (!res || !res.length) return [];
 
-    const activeTickets = res.filter((item: any) => item.isActive).map((item: any) => {
-      const { title, room, isEncrypted } = item;
-
-      // await window.ethereum
-      //   .request({
-      //     method: 'eth_decrypt',
-      //     params: [encryptedTitle, accounts[0]],
-      //   })
-      //   .then((decryptedMessage: string) => {
-      //     console.log('The decrypted message is:', decryptedMessage)
-      //     title = decryptedMessage;
-      //   })
-      //   .catch((error: Error) => console.log(error.message));
-
-      const id = Number(item.id);
-      const from = Number(item.from);
-      const duration = Number(item.duration);
+    // filter out deleted events
+    const activeTickets = res.filter((ticket: any) => ticket.isActive).map((ticket: any) => {
+      const { title, room, isEncrypted } = ticket;
+      const id = Number(ticket.id);
+      const from = Number(ticket.from);
+      const duration = Number(ticket.duration);
       const roomId = ROOM_NAMES.indexOf(room);
       const to = from + duration;
       const date = TOMORROW;
-      return { id, title, room, roomId, from, to, duration, date, isEncrypted };
+      const decryptedTitle = decryptedTitlesCache[id];
+      return { id, title, room, roomId, from, to, duration, date, isEncrypted, decryptedTitle };
     });
 
     return activeTickets;
   }
 
   const setSlotsAndTickets = (slots: Slot[][], tickets: Ticket[]) => {
-    // clear user's tickets data from slots
+    // clear user's tickets data attached to slots
     for (const row of slots) {
       for (const slot of row) {
         if (slot.booked) {
@@ -121,7 +112,8 @@ function Demo () {
         }
       }
     }
-    // apply new ticket data to slots
+
+    // apply the latest tickets data to the respective slots
     for (const ticket of tickets) {
       const row = ticket.roomId;
       const col = ticket.from - OPEN_AT;
@@ -137,51 +129,62 @@ function Demo () {
   }
 
   const loadSlots = async () => {
+    // get slots availability data from the blockchain
     const slots = await getSlots();
     const tickets = await getTickets();
     setSlotsAndTickets(slots, tickets);
   }
 
   const cancelNewTicket = () => {
+    // close the new event modal without saving
     resetSelection();
     setNewTicketModalShown(false);
   }
 
-  const saveTicket = async (title: string, isEncrypting: boolean) => {
+  const saveTicket = async (ticket: Ticket) => {
+    // save the new event to the blockchain
+
     setNewTicketModalShown(false);
-    resetSelection();
-    if (newTicket.room === "") {
-      console.error('error')
+    let title = ticket.title;
+    const { room, roomId, from, duration, isEncrypted } = ticket;
+
+    if (!room || !title) {
+      console.error("Error: Invalid ticket data");
+      setSnack({ message: 'Error - Something went wrong... Try later.', type: 'error', isActive: true });
+      resetSelection();
       return;
     }
-    const { roomId, room, from, duration } = newTicket;
 
-    if (isEncrypting) {
+    // encrypt title if required
+    if (isEncrypted) {
       try {
         title = encryptWithPublicKey(publicKey!, title);
       } catch (err) {
+        console.error(err);
         setSnack({ message: 'Error - Failed to encrypt... Try later.', type: 'error', isActive: true });
+        resetSelection();
         return;
       }
     }
 
-    const isEncrypted = isEncrypting;
-
+    // send event data to contract
     try {
       const res = await contract.methods.book(title, room, from, duration, isEncrypted).send({ from: accounts[0] })
       if (res.status === '0x0') {
         throw new Error('Transaction failed');
       }
-    } catch {
-      // TODO: error handling
+    } catch (err) {
+      console.error(err);
+      setSnack({ message: 'Error - Failed to save... Try later.', type: 'error', isActive: true });
+      resetSelection();
       return;
     }
-    // TODO: error handling
 
     // update slots
+    resetSelection();
     const row = roomId;
     const col = from - OPEN_AT;
-    slots[row][col].ticket = { title, ...newTicket, isEncrypted };
+    slots[row][col].ticket = { ...ticket, title, isEncrypted };
     for (let i = 0; i < duration; i++) {
       slots[row][col + i].disabled = true;
       slots[row][col + i].booked = true;
@@ -189,16 +192,17 @@ function Demo () {
     setSlots(slots);
 
     // show success message
-    setSnack({ message: 'Saved', type: 'success', isActive: true });
+    setSnack({ message: 'Event saved!', type: 'success', isActive: true });
   }
 
   const removeTicket = async (ticket: Ticket) => {
+    // remove the event from the blockchain
     try {
       const res = await contract.methods.removeTicket(ticket.id).send({ from: accounts[0] })
       if (res.status === '0x0') {
         throw new Error('Transaction failed');
       }
-    } catch {
+    } catch (error) {
       // TODO: error handling
       return;
     }
@@ -222,6 +226,8 @@ function Demo () {
   }
 
   const handleSelectSlots = async (slots: any[], selected: any[]) => {
+    // when user selects slots, show the new event modal
+
     setSlots(slots); // update selected slots
 
     const roomId = selected[0].row;
@@ -231,7 +237,6 @@ function Demo () {
     const to = from + duration;
     const date = TOMORROW;
     const isEncrypted = false;
-
     setNewTicket({ roomId, room, from, to, duration, date, isEncrypted })
 
     // showDialog
@@ -246,12 +251,14 @@ function Demo () {
   };
 
   const handleClickTicket = (e: Event, ticket: Ticket) => {
+    // when a ticket is clicked, show the ticket detail
     if (!ticket || ticket.id === undefined) return
     setSelectedTicket(ticket);
     setTicketInfoModalShown(true);
   }
 
   const getPublicKey = async () => {
+    // get public key from MetaMask for encryption
     if (publicKey) return true;
 
     try {
@@ -259,7 +266,7 @@ function Demo () {
         method: 'eth_getEncryptionPublicKey',
         params: [accounts[0]],
       })
-      setPublicKey(Buffer.from(keyB64, 'base64'));
+      publicKey = Buffer.from(keyB64, 'base64');
     } catch (err) {
       console.error(err)
       setSnack({ message: 'Error - Please approve the public key access via MetaMask!', type: 'error', isActive: true });
@@ -269,12 +276,36 @@ function Demo () {
     return true;
   }
 
-  // when web3 is mounted, load data and set event listener
+  const decryptTicketTitle = async (ticket: Ticket) => {
+    if (!ticket.isEncrypted || ticket.id === undefined || decryptedTitlesCache[ticket.id]) return;
+
+    await window.ethereum
+      .request({
+        method: 'eth_decrypt',
+        params: [ticket.title, accounts[0]],
+      })
+      .then((decryptedTitle: string) => {
+        decryptedTitlesCache[ticket.id!] = decryptedTitle;
+        const slot = slots[ticket.roomId][ticket.from - OPEN_AT]
+        slot.ticket.decryptedTitle = decryptedTitle;
+        setSelectedTicket(slot.ticket);
+        setSlots([...slots]);
+      })
+      .catch((error: Error) => {
+        console.error(error.message)
+        setSnack({ message: 'Error - Failed to decrypt... Try later.', type: 'error', isActive: true });
+      });
+  }
+
+  // when web3 is mounted, initialize data & event listener
   useEffect(() => {
     if (!accounts || !accounts[0]) return;
 
     // reset publicKey
-    setPublicKey(undefined);
+    publicKey = undefined; // eslint-disable-line
+
+    // reset decrypted titles cache
+    decryptedTitlesCache.splice(0, decryptedTitlesCache.length)
 
     // initial data load
     loadSlots();
@@ -290,7 +321,7 @@ function Demo () {
 
   }, [accounts]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const eventTable =
+  const EventTable =
     <>
       <h1>COKE ROOMS {TOMORROW}</h1>
       <div className={styles.tableContainer}>
@@ -303,8 +334,8 @@ function Demo () {
           colHeader={HOURS}
           rowHeader={ROOM_NAMES}
           onChange={handleSelectSlots}
-          onSelectionStart={(event: Event) => console.log("start", event)}
-          onInput={(event: Event) => console.log("event", event)}
+          // onSelectionStart={(event: Event) => console.log("start", event)}
+          // onInput={(event: Event) => console.log("event", event)}
           onClickTicket={handleClickTicket}
         />
       </div>
@@ -322,6 +353,7 @@ function Demo () {
         ticket={selectedTicket}
         remove={removeTicket}
         close={() => setTicketInfoModalShown(false)}
+        decryptTicketTitle={decryptTicketTitle}
       />
 
       <SnackBar snack={snack} setSnack={setSnack} />
@@ -332,10 +364,10 @@ function Demo () {
       {
         !state.artifact ? <NoticeNoArtifact /> :
           !state.contract ? <NoticeWrongNetwork /> :
-            eventTable
+            EventTable
       }
     </div>
   )
 }
 
-export default Demo
+export default RoomTimeTable

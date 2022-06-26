@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useCallback } from "react"
+import { useRef, useState, useEffect } from "react"
 import { Switch, FormControlLabel } from '@mui/material/';
 import { EnhancedEncryption, NoEncryption } from '@mui/icons-material';
 import { Ticket } from 'types';
@@ -14,9 +14,19 @@ interface PropType {
 
 
 function NewTicketModal ({ isActive, cancel, newTicket, save, getPublicKey }: PropType) {
-
   const [isEncrypting, setIsEncrypting] = useState(false);
   const titleInputRef = useRef() as React.MutableRefObject<HTMLInputElement>;
+
+  const submit = (e: React.FormEvent<HTMLFormElement> | KeyboardEvent) => {
+    e.preventDefault();
+    const title = titleInputRef.current.value;
+    save({ ...newTicket, title, isEncrypted: isEncrypting });
+  }
+
+  const cancelHandler = (e: React.MouseEvent | KeyboardEvent) => {
+    e.preventDefault();
+    cancel();
+  };
 
   // reset title & encryption switch when modal is shown
   useEffect(() => {
@@ -24,20 +34,6 @@ function NewTicketModal ({ isActive, cancel, newTicket, save, getPublicKey }: Pr
     setIsEncrypting(false);
     titleInputRef.current.value = "New event";
     titleInputRef.current.select();
-  }, [isActive]);
-
-  const submit = useCallback((e: React.FormEvent<HTMLFormElement> | KeyboardEvent) => {
-    e.preventDefault();
-    const title = titleInputRef.current.value;
-    save(title, isEncrypting);
-  }, [save]);  // eslint-disable-line
-
-  const cancelHandler = useCallback((e: React.MouseEvent | KeyboardEvent) => {
-    e.preventDefault();
-    cancel();
-  }, [cancel]);
-
-  useEffect(() => {
     const keyDownHandler = (e: KeyboardEvent) => {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -54,7 +50,8 @@ function NewTicketModal ({ isActive, cancel, newTicket, save, getPublicKey }: Pr
       // eslint-disable-next-line react-hooks/exhaustive-deps
       titleInputRef.current.removeEventListener('keydown', keyDownHandler);
     };
-  }, [submit, cancel]);
+  }, [isActive]); // eslint-disable-line
+
 
   const handleSwitch = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const isChecked = event.target.checked;
@@ -92,12 +89,13 @@ function NewTicketModal ({ isActive, cancel, newTicket, save, getPublicKey }: Pr
             control={
               <Switch checked={isEncrypting} onChange={handleSwitch} name="encrypt" />
             }
-            label="Encrypt the title with your public key"
+            label="Encrypt title with your public key"
             className={styles.customSwitch}
+            data-switch={isEncrypting}
           />
 
           <div className="buttons">
-            <button className="button is-cancel is-rounded" onClick={cancelHandler} tabIndex={-1}>Dismiss</button>
+            <button className="button is-simple is-rounded" onClick={cancelHandler} tabIndex={-1}>Dismiss</button>
             <button className="button is-primary is-rounded" type="submit">Save</button>
           </div>
         </form>

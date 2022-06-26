@@ -8,6 +8,7 @@ export interface Ticket {
   duration: number;
   date: string;
   isEncrypted?: boolean;
+  decryptedTitle?: string;
 }
 
 interface BookedEvent {

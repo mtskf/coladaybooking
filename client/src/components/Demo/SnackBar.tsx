@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Snackbar from '@mui/material/Snackbar';
 import Slide, { SlideProps } from '@mui/material/Slide';
 import styles from "./styles.module.scss";
-import { CheckCircleOutline, ErrorOutline } from '@mui/icons-material';
+import { AutoAwesome, Error } from '@mui/icons-material';
 import { Snack } from 'types';
 
 
@@ -40,8 +40,8 @@ export const SnackBar = ({ snack, setSnack }: PropType) => {
       className={styles.snackBar}
     >
       <div data-type={snack.type}>
-        {snack.type === 'success' && <CheckCircleOutline />}
-        {snack.type === 'error' && <ErrorOutline />}
+        {snack.type === 'success' && <AutoAwesome />}
+        {snack.type === 'error' && <Error />}
         <span>{snack.message}</span>
       </div>
     </Snackbar>

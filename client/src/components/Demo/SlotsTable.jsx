@@ -104,6 +104,7 @@ export default class SlotsTable extends React.Component {
               hasChild={this.props.value[i][j].ticket && true}
               beingSelected={this.isCellBeingSelected(i, j)}
               onClickTicket={this.props.onClickTicket}
+              decrypted={this.props.value[i][j].ticket?.decryptedTitle}
             />
           ))}
         </tr>
@@ -202,7 +203,7 @@ export default class SlotsTable extends React.Component {
 class Cell extends React.Component {
   shouldComponentUpdate = (nextProps) =>
     this.props.beingSelected !== nextProps.beingSelected ||
-    this.props.selected !== nextProps.selected || this.props.disabled !== nextProps.disabled;
+    this.props.selected !== nextProps.selected || this.props.disabled !== nextProps.disabled || this.props.decrypted !== nextProps.decrypted
 
   componentDidMount = () => {
     this.td.addEventListener("touchstart", this.handleTouchStart, {
@@ -290,13 +291,18 @@ class Ticket extends React.Component {
         onClick={e => this.props.onClickTicket(e, ticket)}
         style={{ width: `calc(${ticket.duration}00% + ${ticket.duration - 5}px)` }}
       >
-        {ticket.isEncrypted && <Lock />}
-        <small>{ticket.from}:00</small>
-        {ticket.isEncrypted
-          ? <span>******</span>
-          : <span>{ticket.title}</span>
+        {
+          ticket.decryptedTitle
+            ? <LockOpen />
+            : ticket.isEncrypted && <Lock />
         }
-
+        <small>{ticket.from}:00</small>
+        {ticket.decryptedTitle
+          ? <span>{ticket.decryptedTitle}</span>
+          : ticket.isEncrypted
+            ? <span>******</span>
+            : <span>{ticket.title}</span>
+        }
       </div>
     )
   };
