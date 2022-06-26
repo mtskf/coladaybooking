@@ -5,10 +5,10 @@ contract("ColaDayBooking", (accounts) => {
   beforeEach(async () => {
     instance = await ColaDayBooking.new()
   })
-  context("Booking", async () => {
+  xcontext("Booking", async () => {
     it("Book a room1", async () => {
       try {
-        await instance.book("test", "C01", 8, 2)
+        await instance.book("test", "C01", 8, 2, false)
       } catch (err) {
         assert.equal(false, "Cannot book", err.reason)
         return
@@ -23,7 +23,7 @@ contract("ColaDayBooking", (accounts) => {
     })
     it("Book a room2", async () => {
       try {
-        await instance.book("test", "P02", 10, 3)
+        await instance.book("test", "P02", 10, 3, false)
       } catch (err) {
         assert.equal(false, "Cannot book", err.reason)
         return
@@ -40,7 +40,7 @@ contract("ColaDayBooking", (accounts) => {
     })
     it("Is start time valid?", async () => {
       try {
-        await instance.book("test", "P02", 4, 3)
+        await instance.book("test", "P02", 4, 3, false)
       } catch (err) {
         const errorMessage = "Invalid time"
         assert.equal(err.reason, errorMessage, "Error as expected")
@@ -50,7 +50,7 @@ contract("ColaDayBooking", (accounts) => {
     })
     it("Is duration valid?", async () => {
       try {
-        await instance.book("test", "C05", 8, 6)
+        await instance.book("test", "C05", 8, 6, false)
       } catch (err) {
         const errorMessage = "Duration too long"
         assert.equal(err.reason, errorMessage, "Error as expected")
@@ -60,7 +60,7 @@ contract("ColaDayBooking", (accounts) => {
     })
     it("Is end time valid?", async () => {
       try {
-        await instance.book("test", "C05", 15, 4)
+        await instance.book("test", "C05", 15, 4, false)
       } catch (err) {
         const errorMessage = "Ending too late"
         assert.equal(err.reason, errorMessage, "Error as expected")
@@ -70,14 +70,14 @@ contract("ColaDayBooking", (accounts) => {
     })
     it("Booking conflict should return error", async () => {
       try {
-        await instance.book("test", "C01", 8, 2)
+        await instance.book("test", "C01", 8, 2, false)
       } catch (err) {
         assert.equal(false, "Cannot book", err.reason)
         return
       }
 
       try {
-        await instance.book("test", "C01", 9, 2)
+        await instance.book("test", "C01", 9, 2, false)
       } catch (err) {
         const errorMessage = "Booking conflicts"
         assert.equal(err.reason, errorMessage, "Error as expected")
@@ -110,7 +110,7 @@ contract("ColaDayBooking", (accounts) => {
   context("Load tickets data", async () => {
     it("Booking a room1", async () => {
       try {
-        await instance.book("test", "C01", 8, 2)
+        await instance.book("test", "C01", 8, 2, false)
       } catch (err) {
         assert.equal(false, "Cannot book", err.reason)
         return
