@@ -3,7 +3,7 @@ import { VpnKey, Lock, LockOpen, NoEncryption, DeleteForever } from '@mui/icons-
 import { Ticket } from 'types';
 import styles from "./styles.module.scss";
 
-interface PropType {
+interface PropsType {
   isActive: boolean;
   ticket: Ticket | null;
   remove: any;
@@ -11,7 +11,7 @@ interface PropType {
   decryptTicketTitle: any;
 }
 
-function TicketInfoModal ({ isActive, ticket, remove, close, decryptTicketTitle }: PropType) {
+function TicketInfoModal ({ isActive, ticket, remove, close, decryptTicketTitle }: PropsType) {
 
   useEffect(() => {
     if (!isActive) return;

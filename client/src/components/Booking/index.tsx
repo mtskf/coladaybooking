@@ -7,7 +7,7 @@ import NoticeNoArtifact from "./NoticeNoArtifact";
 import NoticeWrongNetwork from "./NoticeWrongNetwork";
 import NewTicketModal from "./NewTicketModal";
 import TicketInfoModal from "./TicketInfoModal";
-import SlotsTable from "./SlotsTable";
+import SlotsTable from "./SlotsTable.jsx";
 import SnackBar from "./SnackBar";
 import styles from "./styles.module.scss";
 import rooms from "./RoomNames";
@@ -54,7 +54,7 @@ const encryptWithPublicKey = (publicKey: Buffer, message: string) => {
   );
 }
 
-function RoomTimeTable () {
+function BookingModule () {
   const { state } = useEth()
   const { state: { contract, accounts } } = useEth()
   const [slots, setSlots] = useState<Slot[][]>(DEFAULT_SLOTS);
@@ -349,12 +349,12 @@ function RoomTimeTable () {
           rows={ROOM_NAMES.length}
           cols={SLOT_LENGTH}
           maxRows={1}
-          maxColumns={4}
+          maxCols={4}
           colHeader={HOURS}
           rowHeader={ROOM_NAMES}
           onChange={handleSelectSlots}
-          // onSelectionStart={(event: Event) => console.log("start", event)}
-          // onInput={(event: Event) => console.log("event", event)}
+          onSelectionStart={(event: Event) => console.log("start", event)}
+          onInput={(event: Event) => console.log("event", event)}
           onClickTicket={handleClickTicket}
         />
       </div>
@@ -389,4 +389,4 @@ function RoomTimeTable () {
   )
 }
 
-export default RoomTimeTable
+export default BookingModule

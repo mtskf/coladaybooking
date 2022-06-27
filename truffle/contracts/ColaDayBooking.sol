@@ -2,16 +2,12 @@
 pragma solidity >=0.4.22 <0.9.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-// import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-
 /**
  * @title ColaDayBooking
  * @dev A contract for booking rooms on Cola Day.
  * with ETH
  */
 contract ColaDayBooking is Ownable {
-    // using SafeMath for uint8;
-
     string[] private ROOMS = [
         "C01",
         "C02",

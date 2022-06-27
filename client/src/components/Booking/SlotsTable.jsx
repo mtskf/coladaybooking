@@ -2,7 +2,7 @@ import React from "react"
 import { cloneDeep } from "lodash"
 import PropTypes from "prop-types"
 import styles from "./styles.module.scss"
-import { Lock, LockOpen } from '@mui/icons-material'
+import Cell from "./Cell"
 
 export default class SlotsTable extends React.Component {
   static propTypes = {
@@ -102,7 +102,7 @@ export default class SlotsTable extends React.Component {
               booked={this.props.value[i][j].booked}
               ticket={this.props.value[i][j].ticket}
               hasChild={this.props.value[i][j].ticket && true}
-              beingSelected={this.isCellBeingSelected(i, j)}
+              selecting={this.isCellSelecting(i, j)}
               onClickTicket={this.props.onClickTicket}
               decrypted={this.props.value[i][j].ticket?.decryptedTitle}
             />
@@ -184,7 +184,7 @@ export default class SlotsTable extends React.Component {
     }
   };
 
-  isCellBeingSelected = (row, column) => {
+  isCellSelecting = (row, column) => {
     const minRow = Math.min(this.state.startRow, this.state.endRow)
     const maxRow = Math.max(this.state.startRow, this.state.endRow)
     const minColumn = Math.min(this.state.startColumn, this.state.endColumn)
@@ -196,114 +196,6 @@ export default class SlotsTable extends React.Component {
       row <= maxRow &&
       column >= minColumn &&
       column <= maxColumn
-    )
-  };
-}
-
-class Cell extends React.Component {
-  shouldComponentUpdate = (nextProps) =>
-    this.props.beingSelected !== nextProps.beingSelected ||
-    this.props.selected !== nextProps.selected || this.props.disabled !== nextProps.disabled || this.props.decrypted !== nextProps.decrypted
-
-  componentDidMount = () => {
-    this.td.addEventListener("touchstart", this.handleTouchStart, {
-      passive: false
-    })
-    this.td.addEventListener("touchmove", this.handleTouchMove, {
-      passive: false
-    })
-  };
-
-  componentWillUnmount = () => {
-    this.td.removeEventListener("touchstart", this.handleTouchStart)
-    this.td.removeEventListener("touchmove", this.handleTouchMove)
-  };
-
-  render = () => {
-    const classNames = []
-    let {
-      disabled,
-      booked,
-      hasChild,
-      ticket,
-      beingSelected,
-      selected,
-      onTouchStart,
-      onTouchMove,
-      onClickTicket,
-      ...props
-    } = this.props
-
-    if (booked) {
-      classNames.push(styles.booked)
-      if (hasChild) {
-        classNames.push(styles.hasChild)
-      }
-    } else if (disabled) {
-      classNames.push(styles.disabled)
-    } else {
-      classNames.push(styles.enabled)
-      if (selected) {
-        classNames.push(styles.selected)
-      }
-      if (beingSelected) {
-        classNames.push(styles.selecting)
-      }
-    }
-    return (
-      <td
-        ref={(td) => (this.td = td)}
-        className={classNames.join(' ')}
-        onMouseDown={this.handleTouchStart}
-        onMouseMove={this.handleTouchMove}
-        key={props.key}
-        {...props}
-      >
-        {this.props.hasChild && <Ticket ticket={ticket} onClickTicket={this.props.onClickTicket} />}
-        <p>{ }</p>
-      </td>
-    )
-  };
-
-  handleTouchStart = (e) => {
-    if (!this.props.disabled) {
-      this.props.onTouchStart(e)
-    }
-  };
-
-  handleTouchMove = (e) => {
-    if (!this.props.disabled) {
-      this.props.onTouchMove(e)
-    }
-  };
-}
-
-class Ticket extends React.Component {
-
-  render = () => {
-    let { ticket } = this.props
-
-    return (
-      <div
-        className={styles.ticket}
-        data-duration={ticket.duration}
-        data-encrypted={ticket.isEncrypted}
-        onClick={e => this.props.onClickTicket(e, ticket)}
-        style={{ width: `calc(${ticket.duration}00% + ${ticket.duration - 5}px)` }}
-      >
-        {
-          ticket.decryptedTitle
-            ? <LockOpen />
-            : ticket.isEncrypted && <Lock />
-        }
-        <small>{ticket.from}:00</small>
-        {ticket.decryptedTitle
-          ? <span>{ticket.decryptedTitle}</span>
-          : ticket.isEncrypted
-            ? <span>******</span>
-            : <span>{ticket.title}</span>
-        }
-      </div>
     )
   };
 }
