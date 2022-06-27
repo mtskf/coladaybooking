@@ -31,7 +31,7 @@ function NewTicketModal ({ isActive, cancel, newTicket, save, getPublicKey }: Pr
   // reset title & encryption switch when modal is shown
   useEffect(() => {
     if (!isActive) return;
-    setIsEncrypting(false);
+    // setIsEncrypting(false);
     titleInputRef.current.value = "New event";
     titleInputRef.current.select();
     const keyDownHandler = (e: KeyboardEvent) => {

@@ -1,8 +1,8 @@
-function Link({ uri, text }) {
+const Link = ({ uri, text }: { uri: string; text: string; }) => {
   return <a href={uri} target="_blank" rel="noreferrer">{text}</a>;
 }
 
-function Footer() {
+function Footer () {
   return (
     <footer>
       <h2>More resources</h2>

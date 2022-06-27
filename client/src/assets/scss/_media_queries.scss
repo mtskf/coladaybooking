@@ -46,9 +46,7 @@ $breakpoints: ('print': 'print',
   'xl-up': 'screen and (min-width: '+ $breakpoint-xl-min + ')',
   'xxl-up': 'screen and (min-width: ' + $breakpoint-xxl-min + ')',
   'md-ls': 'screen and (min-width: '+$breakpoint-md-min+') and (max-width: '+$breakpoint-md-max+') and (orientation: landscape)',
-  'md-pr': 'screen and (min-width: '+$breakpoint-md-min+') and (max-width: '+$breakpoint-md-max+') and (orientation: portrait)',
-  'mobile': 'screen and (max-width: '+$breakpoint-md-max+')',
-  'desktop': 'screen and (min-width: '+$breakpoint-lg-min+'), print'
+  'md-pr': 'screen and (min-width: '+$breakpoint-md-min+') and (max-width: '+$breakpoint-md-max+') and (orientation: portrait)'
 ) !default;
 
 @mixin mq($breakpoint: md) {

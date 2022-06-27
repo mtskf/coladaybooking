@@ -4,12 +4,10 @@ $modal-content-width: 24rem;
 $modal-overlay-bgColor: rgba($slate800, 0.85);
 $modal-content-bgColor: $slate900;
 
-
 .tableContainer {
   min-width: 480px;
   margin: 2rem 0;
 }
-
 
 .slotsTable {
   width: 100%;
@@ -175,9 +173,6 @@ $modal-content-bgColor: $slate900;
 
   // font-weight: bold;
 }
-
-
-
 
 .modal {
   position: fixed;
@@ -388,8 +383,6 @@ $modal-content-bgColor: $slate900;
 
   }
 }
-
-
 
 .customSwitch {
   display: flex !important;

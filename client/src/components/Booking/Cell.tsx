@@ -62,7 +62,9 @@ function Cell ({ ...props }: PropsType) {
       if (props.hasChild) {
         classNames.push(styles.hasChild)
       }
-    } else if (props.disabled) {
+    }
+
+    if (props.disabled) {
       classNames.push(styles.disabled)
     } else {
       classNames.push(styles.enabled)

@@ -1,0 +1,21 @@
+@import 'assets/scss/_variables';
+
+$navbar-background-color: $slate900;
+$navbar-item-color: #fff;
+
+.navbar {
+  padding: 0 2rem;
+  &__inner {
+    max-width: 1200px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    height: 5rem;
+
+  }
+  h1 {
+    font-weight: 500;
+    font-size: 1.25rem;
+  }
+}

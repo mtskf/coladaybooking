@@ -367,13 +367,12 @@ function BookingModule () {
 
   const EventTable =
     <>
-      <h1>COKE ROOMS {TOMORROW}</h1>
+      {/* <h1>COLA ROOMS {TOMORROW}</h1> */}
       <div className={styles.tableContainer}>
         <SlotsTable
           value={slots}
           rows={ROOM_NAMES.length}
           cols={SLOT_LENGTH}
-          maxRows={1}
           maxCols={4}
           colHeader={HOURS}
           rowHeader={ROOM_NAMES}
