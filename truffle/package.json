@@ -1,8 +1,5 @@
 {
   "dependencies": {
     "@openzeppelin/contracts": "^4.6.0"
-  },
-  "devDependencies": {
-    "@types/clone": "^2.1.1"
   }
 }

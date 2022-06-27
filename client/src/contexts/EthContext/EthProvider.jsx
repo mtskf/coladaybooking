@@ -34,7 +34,7 @@ function EthProvider ({ children }) {
   useEffect(() => {
     const tryInit = async () => {
       try {
-        const artifact = require("../../contracts/HelloWorld.json")
+        const artifact = require("../../contracts/ColaDayBooking.json")
         init(artifact)
       } catch (err) {
         console.error(err)
@@ -42,12 +42,14 @@ function EthProvider ({ children }) {
     }
 
     tryInit()
+
   }, [init])
 
   useEffect(() => {
     const events = ["chainChanged", "accountsChanged"]
     const handleChange = () => {
-      init(state.artifact)
+      // init(state.artifact)
+      window.location.reload()
     }
 
     events.forEach(e => window.ethereum.on(e, handleChange))

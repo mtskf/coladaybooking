@@ -1,5 +1,5 @@
 import { EthProvider } from "./contexts/EthContext";
-import Demo from "./components/Demo";
+import Booking from "./components/Booking";
 import "./App.scss";
 
 function App () {
@@ -7,7 +7,7 @@ function App () {
     <EthProvider>
       <div id="App" >
         <div className="container">
-          <Demo />
+          <Booking />
         </div>
       </div>
     </EthProvider>

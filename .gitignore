@@ -39,3 +39,4 @@ yarn.lock
 blockchain/geth/**
 blockchain/keystore/**
 blockchain/history
+client/src/contracts/**

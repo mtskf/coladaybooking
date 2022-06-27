@@ -7,14 +7,8 @@ export interface Ticket {
   to: number;
   duration: number;
   date: string;
-}
-
-interface BookedEvent {
-  title: string;
-  roomName: string;
-  timeFrom: number;
-  duration: number;
-  user: string;
+  isEncrypted?: boolean;
+  decryptedTitle?: string;
 }
 
 export interface Slot {
@@ -22,4 +16,10 @@ export interface Slot {
   disabled: boolean;
   booked?: boolean;
   ticket?: Booking;
+}
+
+export interface Snack {
+  message?: string;
+  type?: string;
+  isActive?: boolean;
 }
