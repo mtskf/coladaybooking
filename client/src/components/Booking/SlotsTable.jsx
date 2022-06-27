@@ -3,6 +3,9 @@ import { cloneDeep, range } from "lodash"
 import PropTypes from "prop-types"
 import styles from "./styles.module.scss"
 import Cell from "./Cell"
+import cokeIcon from "assets/img/coke.svg"
+import pepsiIcon from "assets/img/pepsi.svg"
+
 
 export default class SlotsTable extends React.Component {
   static propTypes = {
@@ -66,18 +69,18 @@ export default class SlotsTable extends React.Component {
 
   render = () => {
     return (
-      <>
+      <div className={styles.tableContainer}>
         <table className={styles.slotsTable}>
           <thead>{this.renderColHerder()}</thead>
           <tbody>{this.renderRows()}</tbody>
         </table>
-      </>
+      </div>
     )
   };
 
   renderColHerder = () => (
     <tr>
-      <th>&nbsp;</th>
+      <th style={{ textAlign: "center" }}>Rooms</th>
       {this.props.colHeader.map((hour, i) => (
         <th key={i}>{hour}</th>
       ))}
@@ -88,7 +91,7 @@ export default class SlotsTable extends React.Component {
     <>
       {[...Array(this.props.rows)].map((x, i) => (
         <tr key={i}>
-          <th>{this.props.rowHeader[i]}</th>
+          <th><img src={this.props.rowHeader[i][0] === 'C' ? cokeIcon : pepsiIcon} /> {this.props.rowHeader[i]}</th>
           {[...Array(this.props.cols)].map((x, j) => (
             <Cell
               key={j}

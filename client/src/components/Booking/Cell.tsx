@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import styles from "./styles.module.scss"
 import { Ticket } from "types";
-import TicketBox from "./TicketBox"
+import TicketItem from "./TicketItem"
 
 interface PropsType {
   key: number;
@@ -87,7 +87,7 @@ function Cell ({ ...props }: PropsType) {
       onMouseDown={handleTouchStart}
       onMouseMove={handleTouchMove}
     >
-      {nextProps.hasChild && <TicketBox ticket={nextProps.ticket!} onClickTicket={nextProps.onClickTicket} />}
+      {nextProps.hasChild && <TicketItem ticket={nextProps.ticket!} onClickTicket={nextProps.onClickTicket} />}
       <p>{ }</p>
     </td>
   );

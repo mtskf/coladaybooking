@@ -10,7 +10,6 @@ import NewTicketModal from "./NewTicketModal";
 import TicketInfoModal from "./TicketInfoModal";
 import SlotsTable from "./SlotsTable.jsx";
 import SnackBar from "./SnackBar";
-import styles from "./styles.module.scss";
 import rooms from "./RoomNames";
 import { Ticket, Slot, Snack } from "types";
 
@@ -352,7 +351,13 @@ function BookingModule () {
     decryptedTitlesCache.splice(0, decryptedTitlesCache.length)
 
     // initial data load
-    loadSlots();
+    const initialLoad = async () => {
+      setIsLoading(true);
+      await loadSlots();
+      setIsLoading(false);
+    }
+    initialLoad();
+
 
     // Event listener - when event "Updated" monitored, load data
     contract.events.Updated()
@@ -367,21 +372,20 @@ function BookingModule () {
 
   const EventTable =
     <>
-      {/* <h1>COLA ROOMS {TOMORROW}</h1> */}
-      <div className={styles.tableContainer}>
-        <SlotsTable
-          value={slots}
-          rows={ROOM_NAMES.length}
-          cols={SLOT_LENGTH}
-          maxCols={4}
-          colHeader={HOURS}
-          rowHeader={ROOM_NAMES}
-          onChange={handleSelectSlots}
-          onSelectionStart={(event: Event) => console.log("start", event)}
-          onInput={(event: Event) => console.log("event", event)}
-          onClickTicket={handleClickTicket}
-        />
-      </div>
+
+      <SlotsTable
+        value={slots}
+        rows={ROOM_NAMES.length}
+        cols={SLOT_LENGTH}
+        maxCols={4}
+        colHeader={HOURS}
+        rowHeader={ROOM_NAMES}
+        onChange={handleSelectSlots}
+        onSelectionStart={(event: Event) => console.log("start", event)}
+        onInput={(event: Event) => console.log("event", event)}
+        onClickTicket={handleClickTicket}
+      />
+
 
       <NewTicketModal
         isActive={newTicketModalShown}
@@ -399,25 +403,24 @@ function BookingModule () {
         decryptTicketTitle={decryptTicketTitle}
       />
 
-      <SnackBar snack={snack} setSnack={setSnack} />
-    </>
-
-  return (
-    <>
-      <div className="BookingModule">
-        {
-          !state.artifact ? <NoticeNoArtifact /> :
-            !state.contract ? <NoticeWrongNetwork /> :
-              EventTable
-        }
-      </div>
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={isLoading}
       >
         <CircularProgress color="inherit" />
       </Backdrop>
+
+      <SnackBar snack={snack} setSnack={setSnack} />
     </>
+
+  return (
+    <div className="BookingModule">
+      {
+        !state.artifact ? <NoticeNoArtifact /> :
+          !state.contract ? <NoticeWrongNetwork /> :
+            EventTable
+      }
+    </div>
   )
 }
 

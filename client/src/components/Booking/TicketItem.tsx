@@ -7,7 +7,7 @@ interface PropsType {
   onClickTicket: any;
 }
 
-function TicketBox ({ ticket, onClickTicket }: PropsType) {
+function TicketItem ({ ticket, onClickTicket }: PropsType) {
 
   return (
     <div
@@ -34,4 +34,4 @@ function TicketBox ({ ticket, onClickTicket }: PropsType) {
 }
 
 
-export default TicketBox;
+export default TicketItem;

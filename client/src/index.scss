@@ -1,5 +1,4 @@
 @import url("https://use.typekit.net/yhr7yba.css");
-
 @import 'assets/scss/_variables';
 @import 'assets/scss/_media_queries';
 @import 'assets/scss/_bulma';
@@ -10,6 +9,7 @@ html, body, p, ol, ul, li, dl, dt, dd, blockquote, figure, fieldset, legend, tex
 }
 
 html {
+  background-color: $slate900;
   box-sizing: border-box;
   font-size: 100%;
   @include mq(xs) { font-size: 80%; }

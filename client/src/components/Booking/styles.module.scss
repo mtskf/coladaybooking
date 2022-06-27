@@ -1,12 +1,16 @@
 @import 'assets/scss/_variables';
+@import 'assets/scss/_media_queries';
 
 $modal-content-width: 24rem;
 $modal-overlay-bgColor: rgba($slate800, 0.85);
 $modal-content-bgColor: $slate900;
 
 .tableContainer {
-  min-width: 480px;
-  margin: 2rem 0;
+  max-width: 100%;
+  @include mq(xl-up) {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
 }
 
 .slotsTable {
@@ -16,23 +20,25 @@ $modal-content-bgColor: $slate900;
   user-select: none;
   border-collapse: collapse;
 
-
+  thead {
+    position: sticky;
+    top: -1px;
+    z-index: 2;
+    background-color: rgba($slate900, 0.95);
+  }
   thead th {
     color: $slate400;
     font-size: 0.8rem;
     font-weight: normal;
+    padding: 1rem 0 0.5rem;
 
     &:first-child {
-      width: 4rem;
+      width: 15vw;
+      min-width: 7.5rem;
+      @include mq(xl-up) {
+        width: 10rem;
+      }
     }
-  }
-
-  tbody th:first-child {
-    width: 4rem;
-    background-color: darken($slate900, 4%);
-    color: $slate200;
-    text-align: center;
-    vertical-align: middle;
   }
 
   tbody {
@@ -46,12 +52,31 @@ $modal-content-bgColor: $slate900;
         background-color: darken($slate900, 10%);
       }
     }
+
+    th {
+      position: sticky;
+      left: 0;
+      width: 4rem;
+      background-color: darken($slate900, 4%);
+      color: $slate200;
+      transition: all 0.4s ease;
+      text-align: center;
+      vertical-align: middle;
+      font-size: 1rem;
+      font-weight: 500;
+      & > img {
+        display: inline-block;
+        width: 1rem;
+        height: 1rem;
+        margin-right: 0.5rem;
+        vertical-align: -0.05rem;
+      }
+    }
   }
 
   th {
-    transition: all 0.4s ease;
+    border: 1px solid transparent;
   }
-
   td {
     text-align: center;
     text-overflow: ellipsis;
@@ -63,6 +88,10 @@ $modal-content-bgColor: $slate900;
     padding: 0.25rem;
     vertical-align: middle;
     transition: all 0.4s ease;
+
+    &:nth-child(2) {
+      border-left-width: 4px;
+    }
 
     &.enabled {
       background-color: darken($slate900, 4%);

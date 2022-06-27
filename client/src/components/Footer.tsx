@@ -1,15 +1,21 @@
-const Link = ({ uri, text }: { uri: string; text: string; }) => {
-  return <a href={uri} target="_blank" rel="noreferrer">{text}</a>;
+import React from 'react';
+import { Language, GitHub, LinkedIn, Pinterest } from '@mui/icons-material';
+import styles from "./styles.module.scss";
+
+const Link = ({ uri, text, children }: { uri: string; text: string; children: any }) => {
+  return <li><a href={uri} target="_blank" rel="noreferrer">{children}</a></li>;
 }
 
 function Footer () {
   return (
-    <footer>
-      <h2>More resources</h2>
-      <Link uri={"https://trufflesuite.com"} text={"Truffle"} />
-      <Link uri={"https://reactjs.org"} text={"React"} />
-      <Link uri={"https://soliditylang.org"} text={"Solidity"} />
-      <Link uri={"https://ethereum.org"} text={"Ethereum"} />
+    <footer className={styles.footer}>
+      <h2>Design & Develop by Mitsuki Fukunaga</h2>
+      <ul>
+        <Link uri={"https://mitsuki.vercel.app"} text={"Website"}><Language /></Link>
+        <Link uri={"https://github.com/mtskf"} text={"GitHub"}><GitHub /></Link>
+        <Link uri={"https://www.linkedin.com/in/mitsuki/"} text={"LinkedIn"}><LinkedIn /></Link>
+        <Link uri={"https://www.pinterest.com.au/mtskf/"} text={"Pinterest"}><Pinterest /></Link>
+      </ul>
     </footer >
   );
 }

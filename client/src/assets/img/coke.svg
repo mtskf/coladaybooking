@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="20" height="20" viewBox="0 0 20 20">
+  <defs>
+    <clipPath id="clip-coke">
+      <rect width="20" height="20"/>
+    </clipPath>
+  </defs>
+  <g id="coke" clip-path="url(#clip-coke)">
+    <path id="Path_62" data-name="Path 62" d="M6.667,0h6.667A6.667,6.667,0,0,1,20,6.667v6.667A6.667,6.667,0,0,1,13.333,20H6.667A6.667,6.667,0,0,1,0,13.333V6.667A6.667,6.667,0,0,1,6.667,0Z" fill="#c00"/>
+    <path id="Path_67" data-name="Path 67" d="M-10822.864-774.576c.6-11.478-2.337-12.6-4.307-15.46-1.173-1.705-1.728-2.507-1.817-4.334a6.679,6.679,0,0,1,1.654-.207h.854c.136,1.336.959,2.533,2.061,4.13,2.027,2.942,5.536,7.88,5.432,15.657a6.679,6.679,0,0,1-1.68.214Z" transform="translate(10834 794.578)" fill="#fff"/>
+  </g>
+</svg>
