@@ -1,5 +1,3 @@
-// const truffleAssert = require('truffle-assertions')
-
 const ColaDayBooking = artifacts.require("ColaDayBooking")
 const rooms = ["C01", "C02", "C03", "C04", "C05", "C06", "C07", "C08", "C09", "C10", "P01", "P02", "P03", "P04", "P05", "P06", "P07", "P08", "P09", "P10"]
 
@@ -201,18 +199,4 @@ contract("ColaDayBooking", (accounts) => {
 
     })
   })
-  // context("Event", async () => {
-  //   it("Booking rooms", async () => {
-  //     // truffleAssert.eventEmitted(result, 'Updated', (ev) => {
-  //     //   console.log(ev)
-  //     //   return true
-  //     // })
-  //     assertEventOfType: function(response, eventName, index) {
-  //       assert.equal(response.logs[index].event, eventName, eventName + ' event should fire.')
-  //     }
-  //     await instance.book("test", "C01", 8, 2, false)
-
-  //   })
-  // })
-
 })
