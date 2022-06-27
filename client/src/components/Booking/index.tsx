@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Backdrop, CircularProgress } from '@mui/material';
 import { bufferToHex } from "ethereumjs-util";
 import { encrypt } from "@metamask/eth-sig-util";
 import { add, format } from "date-fns";
@@ -63,6 +64,7 @@ function BookingModule () {
   const [newTicketModalShown, setNewTicketModalShown] = useState(false);
   const [ticketInfoModalShown, setTicketInfoModalShown] = useState(false);
   const [snack, setSnack] = useState<Snack>({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const getSlots = async () => {
     try {
@@ -162,39 +164,48 @@ function BookingModule () {
   const saveTicket = async (ticket: Ticket) => {
     // save the new event to the blockchain
 
-    setNewTicketModalShown(false);
     let title = ticket.title;
     const { room, roomId, from, duration, isEncrypted } = ticket;
 
-    if (!room || !title) {
-      console.error("Error: Invalid ticket data");
-      setSnack({ message: 'Error - Something went wrong... Try later.', type: 'error', isActive: true });
-      resetSelection();
-      return;
-    }
+    // show loading spinner
+    setIsLoading(true);
 
-    // encrypt title if required
-    if (isEncrypted) {
-      try {
-        title = encryptWithPublicKey(publicKey!, title);
-      } catch (err) {
-        console.error(err);
-        setSnack({ message: 'Error - Failed to encrypt... Try later.', type: 'error', isActive: true });
-        resetSelection();
-        return;
-      }
-    }
+    // hide modal
+    setNewTicketModalShown(false);
 
-    // send event data to contract
     try {
-      const res = await contract.methods.book(title, room, from, duration, isEncrypted).send({ from: accounts[0] })
-      if (!res || res.status === '0x0') {
-        throw new Error('Booking failed');
+      // error handling
+      if (!room) {
+        throw new Error('Please fill in all the fields');
+      }
+
+      // encrypt title if required
+      if (isEncrypted) {
+        const isPubKeyAvailable = await getPublicKey();
+        if (!isPubKeyAvailable) {
+          throw new Error('Public key is not available');
+        }
+        try {
+          title = encryptWithPublicKey(publicKey!, title ?? ' ');
+        } catch (err) {
+          throw err;
+        }
+      }
+
+      // send event data to contract
+      try {
+        const res = await contract.methods.book(title, room, from, duration, isEncrypted).send({ from: accounts[0] })
+        if (!res || res.status === '0x0') {
+          throw new Error('Booking failed');
+        }
+      } catch (err) {
+        throw err;
       }
     } catch (err) {
       console.error(err);
       setSnack({ message: 'Error - Failed to save... Try later.', type: 'error', isActive: true });
       resetSelection();
+      setIsLoading(false);
       return;
     }
 
@@ -209,12 +220,19 @@ function BookingModule () {
     }
     setSlots(slots);
 
+    // hide loading spinner
+    setIsLoading(false);
+
     // show success message
     setSnack({ message: 'Event saved!', type: 'success', isActive: true });
   }
 
   const removeTicket = async (ticket: Ticket) => {
     // remove the event from the blockchain
+
+    // show loading spinner
+    setIsLoading(true);
+
     try {
       const res = await contract.methods.removeTicket(ticket.id).send({ from: accounts[0] })
       if (res.status === '0x0') {
@@ -223,6 +241,7 @@ function BookingModule () {
     } catch (err) {
       console.error(err);
       setSnack({ message: 'Error - Failed to delete event... Try later.', type: 'error', isActive: true });
+      setIsLoading(false);
       return;
     }
 
@@ -239,6 +258,9 @@ function BookingModule () {
     // close modal
     setTicketInfoModalShown(false);
     if (selectedTicket) setSelectedTicket(null);
+
+    // hide loading spinner
+    setIsLoading(false);
 
     // show success message
     setSnack({ message: 'Event deleted!', type: 'success', isActive: true });
@@ -280,6 +302,7 @@ function BookingModule () {
     // get public key from MetaMask for encryption
     if (publicKey) return true;
 
+    setIsLoading(true);
     try {
       const keyB64 = await window.ethereum.request({
         method: 'eth_getEncryptionPublicKey',
@@ -289,9 +312,11 @@ function BookingModule () {
     } catch (err) {
       console.error(err)
       setSnack({ message: 'Error - Please approve the public key access via MetaMask!', type: 'error', isActive: true });
+      setIsLoading(false);
       return false;
     }
 
+    setIsLoading(false);
     return true;
   }
 
@@ -379,13 +404,21 @@ function BookingModule () {
     </>
 
   return (
-    <div className="demo">
-      {
-        !state.artifact ? <NoticeNoArtifact /> :
-          !state.contract ? <NoticeWrongNetwork /> :
-            EventTable
-      }
-    </div>
+    <>
+      <div className="BookingModule">
+        {
+          !state.artifact ? <NoticeNoArtifact /> :
+            !state.contract ? <NoticeWrongNetwork /> :
+              EventTable
+        }
+      </div>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={isLoading}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+    </>
   )
 }
 
