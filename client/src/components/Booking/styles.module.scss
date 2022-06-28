@@ -5,6 +5,15 @@ $modal-content-width: 24rem;
 $modal-overlay-bgColor: rgba($slate800, 0.85);
 $modal-content-bgColor: $slate900;
 
+.bookingModule {
+  transition: opacity 0.8s ease;
+
+  &:not([data-initialized="true"]) {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
 .tableContainer {
   max-width: 100%;
   @include mq(xl-up) {
@@ -516,5 +525,50 @@ $modal-content-bgColor: $slate900;
       flex-grow: 1;
       flex-shrink: 1;
     }
+  }
+}
+
+.notice {
+  padding: 4rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+
+  @include mq(xl-up) {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  &Image {
+    position: relative;
+    margin: 0 auto 2rem;
+    img {
+      &:first-child {
+        display: block;
+        width: 10rem;
+        height: 10rem;
+      }
+      &:last-child {
+        position: absolute;
+        right: 0.5rem;
+        bottom: 0.5rem;
+        display: block;
+        width: 2rem;
+        height: 2rem;
+        color: $red;
+      }
+    }
+  }
+
+  h2 {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+
+  button {
+    margin-top: 2rem;
   }
 }

@@ -46,10 +46,13 @@ function EthProvider ({ children }) {
   }, [init])
 
   useEffect(() => {
-    const events = ["chainChanged", "accountsChanged"]
+    const events = ["chainChanged", "accountsChanged", "disconnect"]
     const handleChange = () => {
+      dispatch({
+        type: actions.init,
+        data: initialState
+      })
       init(state.artifact)
-      // window.location.reload()
     }
 
     events.forEach(e => window.ethereum.on(e, handleChange))
