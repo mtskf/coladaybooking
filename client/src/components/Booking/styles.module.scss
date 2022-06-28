@@ -61,13 +61,14 @@ $modal-content-bgColor: $slate900;
     position: sticky;
     top: -1px;
     z-index: 2;
-    background-color: rgba($slate900, 0.95);
   }
   thead th {
     color: $slate400;
     font-size: 0.8rem;
     font-weight: normal;
     padding: 1rem 0 0.5rem;
+    border: none;
+    background-color: rgba($slate900, 0.95);
 
     &:first-child {
       width: 15vw;
