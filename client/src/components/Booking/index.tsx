@@ -10,6 +10,7 @@ import NewTicketModal from "./NewTicketModal";
 import TicketInfoModal from "./TicketInfoModal";
 import SlotsTable from "./SlotsTable.jsx";
 import SnackBar from "./SnackBar";
+import TableReference from "./TableReference";
 import rooms from "./RoomNames";
 import { Ticket, Slot, Snack } from "types";
 
@@ -342,7 +343,7 @@ function BookingModule () {
 
   // when web3 is mounted, initialize data & event listener
   useEffect(() => {
-    if (!accounts || !accounts[0]) return;
+    if (!state.artifact || !state.contract || !accounts || !accounts[0]) return;
 
     // reset publicKey
     publicKey = undefined; // eslint-disable-line
@@ -372,6 +373,8 @@ function BookingModule () {
 
   const EventTable =
     <>
+
+      <TableReference />
 
       <SlotsTable
         value={slots}

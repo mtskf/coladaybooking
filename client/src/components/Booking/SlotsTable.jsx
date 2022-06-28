@@ -91,7 +91,7 @@ export default class SlotsTable extends React.Component {
     <>
       {[...Array(this.props.rows)].map((x, i) => (
         <tr key={i}>
-          <th><img src={this.props.rowHeader[i][0] === 'C' ? cokeIcon : pepsiIcon} /> {this.props.rowHeader[i]}</th>
+          <th><img src={this.props.rowHeader[i][0] === 'C' ? cokeIcon : pepsiIcon} alt=" " /> {this.props.rowHeader[i]}</th>
           {[...Array(this.props.cols)].map((x, j) => (
             <Cell
               key={j}

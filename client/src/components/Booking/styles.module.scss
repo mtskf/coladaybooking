@@ -13,6 +13,43 @@ $modal-content-bgColor: $slate900;
   }
 }
 
+.tableReference {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  max-width: 100%;
+  margin-bottom: 1rem;
+  padding: 0 2rem;
+  font-size: 0.75rem;
+  color: $slate400;
+  @include mq(xl-up) {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0;
+  }
+
+  & > li {
+    display: flex;
+    gap: 0.5rem;
+    &:before {
+      content: "";
+      display: block;
+      width: 1rem;
+      height: 1rem;
+    }
+    &[data-type="disabled"]:before {
+      border: 1px solid $slate500;
+      background-color: $slate700;
+    }
+    &[data-type="ticket"]:before {
+      border: 1px solid $primary;
+      border-left-width: 0.3rem;
+      border-radius: 0.15rem;
+      background-color: rgba($greenyellow, 0.1);
+    }
+  }
+}
+
 .slotsTable {
   width: 100%;
   margin: 0 auto;
@@ -90,7 +127,7 @@ $modal-content-bgColor: $slate900;
     transition: all 0.4s ease;
 
     &:nth-child(2) {
-      border-left-width: 4px;
+      border-left-width: 3px;
     }
 
     &.enabled {
@@ -184,7 +221,7 @@ $modal-content-bgColor: $slate900;
     font-weight: bold;
 
     &[data-type="success"] {
-      background-color: lime;
+      background-color: $primary;
       color: $slate900;
     }
 
