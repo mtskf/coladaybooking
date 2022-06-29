@@ -101,7 +101,6 @@ export default class SlotsTable extends React.Component {
               disabled={this.props.value[i][j].disabled}
               booked={this.props.value[i][j].booked}
               ticket={this.props.value[i][j].ticket}
-              hasChild={this.props.value[i][j].ticket && true}
               selecting={this.isCellSelecting(i, j)}
               onClickTicket={this.props.onClickTicket}
               decrypted={this.props.value[i][j].ticket?.decryptedTitle}

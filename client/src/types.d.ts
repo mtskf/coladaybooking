@@ -1,3 +1,12 @@
+declare global {
+  interface Window {
+    ethereum: any;
+  }
+  interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
+    disabled?: boolean;
+  }
+}
+
 export interface Ticket {
   id?: number;
   title?: string;
@@ -9,12 +18,14 @@ export interface Ticket {
   date: string;
   isEncrypted?: boolean;
   decryptedTitle?: string;
+  isPending?: boolean;
 }
 
 export interface Slot {
   selected: boolean;
   disabled: boolean;
   booked?: boolean;
+  isPending?: boolean;
   ticket?: Booking;
 }
 

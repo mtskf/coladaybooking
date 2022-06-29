@@ -20,7 +20,7 @@ function NewTicketModal ({ isActive, cancel, newTicket, save, getPublicKey }: Pr
   const submit = (e: React.FormEvent<HTMLFormElement> | KeyboardEvent) => {
     e.preventDefault();
     const title = titleInputRef.current.value;
-    save({ ...newTicket, title, isEncrypted: isEncrypting });
+    save({ ...newTicket, title, isEncrypted: isEncrypting, isPending: true });
   }
 
   const cancelHandler = (e: React.MouseEvent | KeyboardEvent) => {
@@ -31,9 +31,10 @@ function NewTicketModal ({ isActive, cancel, newTicket, save, getPublicKey }: Pr
   // reset title & encryption switch when modal is shown
   useEffect(() => {
     if (!isActive) return;
-    // setIsEncrypting(false);
+
     titleInputRef.current.value = "New event";
     titleInputRef.current.select();
+
     const keyDownHandler = (e: KeyboardEvent) => {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -47,8 +48,7 @@ function NewTicketModal ({ isActive, cancel, newTicket, save, getPublicKey }: Pr
     titleInputRef.current.addEventListener('keydown', keyDownHandler);
 
     return () => {
-      // eslint-disable-next-line
-      titleInputRef.current.removeEventListener('keydown', keyDownHandler);
+      titleInputRef.current.removeEventListener('keydown', keyDownHandler); // eslint-disable-line
     };
   }, [isActive]); // eslint-disable-line
 

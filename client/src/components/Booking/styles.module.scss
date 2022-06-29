@@ -125,9 +125,8 @@ $modal-content-bgColor: $slate900;
     border: 1px solid transparent;
   }
   td {
-    text-align: center;
-    text-overflow: ellipsis;
-    overflow: hidden;
+    position: relative;;
+    overflow: visible;
     border: 1px solid transparent;
     box-sizing: border-box;
     background-clip: padding-box;
@@ -162,9 +161,8 @@ $modal-content-bgColor: $slate900;
       background-color: darken($slate900, 3%);
     }
 
-    &.hasChild {
-      position: relative;
-      overflow: visible;
+    &.hasTicket {
+      z-index: 2;
     }
   }
 }
@@ -186,6 +184,9 @@ $modal-content-bgColor: $slate900;
   line-height: 1.1;
   cursor: pointer;
   transition: all 0.3s ease;
+  &[data-pending="true"] {
+    border-color: red !important;
+  }
 
   &:hover {
     z-index: 10;

@@ -14,6 +14,7 @@ function TicketItem ({ ticket, onClickTicket }: PropsType) {
       className={styles.ticket}
       data-duration={ticket.duration}
       data-encrypted={ticket.isEncrypted}
+      data-pending={ticket.isPending}
       onClick={e => onClickTicket(e, ticket)}
       style={{ width: `calc(${ticket.duration}00% + ${ticket.duration - 5}px)` }}
     >
