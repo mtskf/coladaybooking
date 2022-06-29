@@ -1,5 +1,5 @@
 import styles from "./styles.module.scss"
-import { Lock, LockOpen } from '@mui/icons-material'
+import { Lock, LockOpen, Autorenew } from '@mui/icons-material'
 import { Ticket } from "types";
 
 interface PropsType {
@@ -18,11 +18,14 @@ function TicketItem ({ ticket, onClickTicket }: PropsType) {
       onClick={e => onClickTicket(e, ticket)}
       style={{ width: `calc(${ticket.duration}00% + ${ticket.duration - 5}px)` }}
     >
-      {
-        ticket.decryptedTitle
-          ? <LockOpen />
-          : ticket.isEncrypted && <Lock />
-      }
+      <div className={styles.ticketIcon}>
+        {ticket.isPending && <Autorenew />}
+        {
+          ticket.decryptedTitle
+            ? <LockOpen />
+            : ticket.isEncrypted && <Lock />
+        }
+      </div>
       <small>{ticket.from}:00</small>
       {ticket.decryptedTitle
         ? <span>{ticket.decryptedTitle}</span>

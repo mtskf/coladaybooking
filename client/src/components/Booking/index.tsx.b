@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Backdrop, CircularProgress } from '@mui/material';
 import { bufferToHex } from "ethereumjs-util";
 import { encrypt } from "@metamask/eth-sig-util";
@@ -12,7 +12,7 @@ import SlotsTable from "./SlotsTable.jsx";
 import SnackBar from "./SnackBar";
 import TableReference from "./TableReference";
 import rooms from "./RoomNames";
-import { Ticket, Slot, Snack } from "types";
+import { Ticket, Snack } from "types";
 import styles from "./styles.module.scss";
 
 const OPEN_AT = 8;
@@ -21,10 +21,9 @@ const SLOT_LENGTH = CLOSE_AT - OPEN_AT;
 const HOURS = [...Array(SLOT_LENGTH)].map((x, i) => `${i + OPEN_AT}:00`);
 const ROOM_NAMES = rooms;
 const TOMORROW = format(add(new Date(), { days: 1 }), 'd MMM, yyyy');
-const DEFAULT_SLOTS = [...Array(ROOM_NAMES.length)].map(() => [...Array(SLOT_LENGTH)].map((x) => {
-  return { selected: false, disabled: false }
-}))
+const DEFAULT_SLOTS = [...Array(ROOM_NAMES.length)].map(() => [...Array(SLOT_LENGTH)].map((x) => false));
 const DEFAULT_TICKET = { roomId: 0, room: "", from: 0, to: 0, duration: 0, date: "", }
+
 const decryptedTitlesCache: string[] = [];
 let publicKey: Buffer | undefined;
 
@@ -43,20 +42,15 @@ const encryptWithPublicKey = (publicKey: Buffer, message: string) => {
   );
 }
 
-const usePrevious = (value: any, initialValue: any) => {
-  const ref = useRef(initialValue);
-  useEffect(() => {
-    ref.current = value;
-  });
-  return ref.current;
-};
-
 function BookingModule () {
   const { state } = useEth()
   const { state: { contract, accounts } } = useEth()
 
-  const [slots, setSlots] = useState<Slot[][]>(DEFAULT_SLOTS);
-  const [newTicket, setNewTicket] = useState<Ticket>(DEFAULT_TICKET)
+  const [slots, setSlots] = useState<boolean[][]>(DEFAULT_SLOTS);
+  const [tickets, setTickets] = useState<Ticket[][]>([]);
+  const [selected, setSelected] = useState<boolean[][]>([]);
+
+  const [newTicket, setNewTicket] = useState<Ticket>(DEFAULT_TICKET);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [newTicketModalShown, setNewTicketModalShown] = useState(false);
   const [ticketInfoModalShown, setTicketInfoModalShown] = useState(false);
@@ -65,20 +59,13 @@ function BookingModule () {
   const [isInitialized, setIsInitialized] = useState(false);
 
   const getSlots = async () => {
+    // get users' tickets data from the blockchain
     try {
       const res = await contract.methods.getSlots().call({ from: accounts[0] });
-
       if (!res || res.status === '0x0') {
-        throw new Error('Booking failed');
+        throw new Error('Faild getting slots.');
       }
-
-      const slots = res.map((row: any, i: number) => row.map((val: boolean) => {
-        return {
-          selected: false,
-          disabled: !val,
-        }
-      }));
-      return slots;
+      setSlots(res);
     } catch (err) {
       setSnack({ message: 'Error - Failed to retrieve data... Try reloading the page.', type: 'error', isActive: true });
       return;
@@ -86,6 +73,7 @@ function BookingModule () {
   }
 
   const getTickets = async () => {
+    // get the latest slots availability data from the blockchain
     try {
       const res = await contract.methods.getTickets().call({ from: accounts[0] })
 
@@ -93,8 +81,10 @@ function BookingModule () {
         throw new Error('Faild getting tickets.');
       }
 
-      // filter out deleted events
-      const activeTickets = res.filter((ticket: any) => ticket.isActive).map((ticket: any) => {
+      const newTickets: Ticket[][] = [];
+
+      // filter out deleted events, and update tickets
+      res.filter((ticket: any) => ticket.isActive).forEach((ticket: Ticket) => {
         const { title, room, isEncrypted } = ticket;
         const id = Number(ticket.id);
         const from = Number(ticket.from);
@@ -103,51 +93,76 @@ function BookingModule () {
         const to = from + duration;
         const date = TOMORROW;
         const decryptedTitle = decryptedTitlesCache[id];
-        return { id, title, room, roomId, from, to, duration, date, isEncrypted, decryptedTitle };
+        const newTicket = { id, title, room, roomId, from, to, duration, date, isEncrypted, decryptedTitle };
+        const col = roomId;
+        const row = from - OPEN_AT;
+        tickets[row][col] = newTicket;
       });
 
-      return activeTickets;
-
+      setTickets(tickets);
+      setTickets(activeTickets);
     } catch (err) {
       setSnack({ message: 'Error - Failed to retrieve data... Try reloading the page.', type: 'error', isActive: true });
       return;
     }
   }
 
-  const setSlotsAndTickets = (slots: Slot[][], tickets: Ticket[]) => {
-    // clear user's tickets data attached to slots
-    for (const row of slots) {
-      for (const slot of row) {
-        if (slot.booked) {
-          slot.booked = false;
-          if (slot.ticket) {
-            delete slot.ticket;
+
+  // const updateSlots = async () => {
+  //   // apply new slots data to the slotsTable
+  //   try {
+  //     const res = await getSlots();
+
+  //     slots.forEach((room: Slot[], row: number) =>
+  //       room.forEach((slot: Slot, col: number) => {
+  //         slot.disabled = !res[row][col] as boolean;
+  //       })
+  //     )
+
+  //     setSlots(slots);
+
+  //   } catch (err) {
+  //     console.error(err);
+  //     setSnack({ message: 'Error - Failed to retrieve data... Try reloading the page.', type: 'error', isActive: true });
+  //     return;
+  //   }
+  // }
+
+
+  const updateTickets = async () => {
+    // apply the latest tickets data to the respective slots
+    try {
+      const newTickets = await getActiveTickets();
+
+      // clear user's tickets data attached to the slotsTable
+      for (const room of slots) {
+        for (const slot of room) {
+          if (slot.booked) {
+            slot.booked = false;
+            if (slot.ticket) {
+              delete slot.ticket;
+            }
           }
         }
       }
-    }
 
-    // apply the latest tickets data to the respective slots
-    for (const ticket of tickets) {
-      const row = ticket.roomId;
-      const col = ticket.from - OPEN_AT;
-      const duration = ticket.duration;
+      for (const ticket of newTickets) {
+        const row = ticket.roomId;
+        const col = ticket.from - OPEN_AT;
+        const duration = ticket.duration;
 
-      for (let i = 0; i < duration; i++) {
-        const slot = slots[row][col + i];
-        i || (slot.ticket = ticket!);
-        // slot.disabled = true;
-        slot.booked = true;
+        for (let i = 0; i < duration; i++) {
+          const slot = slots[row][col + i];
+          i || (slot.ticket = ticket!);
+          slot.booked = true;
+        }
       }
-    }
-    setSlots(slots);
-  }
 
-  const loadSlots = async () => {
-    // get slots availability data from the blockchain
-    const slots = await getSlots();
-    const tickets = await getTickets();
-    setSlotsAndTickets(slots, tickets);
+      setSlots(slots);
+
+    } catch (err) {
+      setSnack({ message: 'Error - Failed to retrieve data... Try reloading the page.', type: 'error', isActive: true });
+    }
   }
 
   const resetSelection = () => {
@@ -165,11 +180,11 @@ function BookingModule () {
   const saveTicket = async (ticket: Ticket) => {
     // save the new event to the blockchain
 
-    // show loading spinner
-    setIsLoading(true);
-
     let title = ticket.title;
     const { room, roomId, from, duration, isEncrypted } = ticket;
+
+    // show loading spinner
+    setIsLoading(true);
 
     // hide modal
     setNewTicketModalShown(false);
@@ -243,29 +258,42 @@ function BookingModule () {
   const removeTicket = async (ticket: Ticket) => {
     // remove the event from the blockchain
 
-    // hide modal
-    setTicketInfoModalShown(false);
+    // show loading spinner
+    setIsLoading(true);
 
     // TODO: make the ticket pending
-    ticket.isPending = true;
-    setSlots(slots);
 
     try {
       const res = await contract.methods.removeTicket(ticket.id).send({ from: accounts[0] })
       if (res.status === '0x0') {
         throw new Error('Transaction failed');
       }
-
-      // show success message
-      setSnack({ message: 'Event deleted!', type: 'success', isActive: true });
-
     } catch (err) {
-      // clear the pending state of the ticket
-      ticket.isPending = false;
-      setSlots(slots);
-
+      // TODO: rollback pending state of the ticket
       setSnack({ message: 'Error - Failed to delete event... Try later.', type: 'error', isActive: true });
+      setIsLoading(false);
+      return;
     }
+
+    // update slots
+    const row = ticket.roomId;
+    const col = ticket.from - OPEN_AT;
+    for (let i = 0; i < ticket.duration; i++) {
+      slots[row][col + i].disabled = false;
+      slots[row][col + i].booked = false;
+    }
+    delete slots[row][col].ticket;
+    setSlots(slots);
+
+    // close modal
+    setTicketInfoModalShown(false);
+    if (selectedTicket) setSelectedTicket(null);
+
+    // hide loading spinner
+    setIsLoading(false);
+
+    // show success message
+    setSnack({ message: 'Event deleted!', type: 'success', isActive: true });
   }
 
   const handleSelectSlots = async (slots: any[], selected: any[]) => {
@@ -354,8 +382,8 @@ function BookingModule () {
 
     // initial data load
     const initialLoad = async () => {
-      setIsLoading(true);
-      await loadSlots();
+      await updateSlots();
+      await updateTickets();
       setIsLoading(false);
     }
     initialLoad();
@@ -363,12 +391,12 @@ function BookingModule () {
 
     // Event listener - when event "Updated" monitored, load data
     contract.events.Updated()
-      .on("data", loadSlots)
+      .on("data", updateSlots)
       .on("error", console.error);
 
     // remove event listener when unmount
     return () =>
-      contract.events.Updated().removeListener("data", loadSlots)
+      contract.events.Updated().removeListener("data", updateSlots)
 
   }, [accounts]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -431,7 +459,7 @@ function BookingModule () {
           !state.contract ? <NoticeWrongNetwork /> :
             EventTable
       }
-    </div>
+    </div >
   )
 }
 

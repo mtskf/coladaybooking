@@ -5,8 +5,9 @@ function TableReference () {
   // const update
   return (
     <ul className={styles.tableReference}>
+      <li data-type="ticket">Your events</li>
+      <li data-type="pending">Pending events</li>
       <li data-type="disabled">Not available</li>
-      <li data-type="ticket">Your bookings</li>
     </ul >
 
   )

@@ -54,7 +54,12 @@ $modal-content-bgColor: $slate900;
       border: 1px solid $primary;
       border-left-width: 0.3rem;
       border-radius: 0.15rem;
-      background-color: rgba($greenyellow, 0.1);
+      background-color: rgba($primary, 0.1);
+    }
+    &[data-type="pending"]:before {
+      border: 1px dashed rgba($primary, 0.5);
+      border-radius: 0.15rem;
+      background-color: rgba($primary, 0.1);
     }
   }
 }
@@ -95,7 +100,7 @@ $modal-content-bgColor: $slate900;
       }
 
       &>th {
-        color: $greenyellow;
+        color: $primary;
         background-color: darken($slate900, 10%);
       }
     }
@@ -150,7 +155,7 @@ $modal-content-bgColor: $slate900;
     }
 
     &.selecting {
-      background-color: $greenyellow;
+      background-color: $primary;
     }
 
     &.selected {
@@ -175,32 +180,40 @@ $modal-content-bgColor: $slate900;
   width: 100%;
   height: calc(100% - 4px);
   padding: 0.2rem 0.4rem 0;
-  background-color: rgba($greenyellow, 0.1);
-  border: 1px solid $greenyellow;
+  background-color: rgba($primary, 0.1);
+  border: 1px solid $primary;
   border-left-width: 0.3rem;
   border-radius: 0.25rem;
-  box-shadow: 0 0.25rem 1rem rgba($greenyellow, 0.1);
-  color: $greenyellow;
+  box-shadow: 0 0.25rem 1rem rgba($primary, 0.1);
+  color: $primary;
   line-height: 1.1;
   cursor: pointer;
   transition: all 0.3s ease;
   &[data-pending="true"] {
-    border-color: red !important;
+    border-style: dashed;
+    border-left-width: 1px;
+    border-color: rgba($primary, 0.5);
+    color: rgba($primary, 0.7);
   }
 
   &:hover {
     z-index: 10;
     border-color: $lime;
-    background-color: rgba($greenyellow, 0.2);
-    box-shadow: 0 0.25rem 1rem rgba($greenyellow, 0.3);
+    background-color: rgba($primary, 0.2);
+    box-shadow: 0 0.25rem 1rem rgba($primary, 0.3);
   }
 
-  &>svg {
+  &Icon {
     position: absolute;
     top: 0.25rem;
     right: 0.25rem;
-    width: 0.65rem;
-    height: 0.65rem;
+    display: flex;
+    gap: 0.2rem;
+    & > svg {
+      display: block;
+      width: 0.65rem;
+      height: 0.65rem;
+    }
   }
 
   &>small {
@@ -325,15 +338,15 @@ $modal-content-bgColor: $slate900;
     border-radius: 0;
     border: none;
     border-bottom: 1px solid $slate600;
-    caret-color: $greenyellow;
+    caret-color: $primary;
     font-size: 1.125rem;
 
     &::selection {
-      background-color: rgba($greenyellow, 0.3);
+      background-color: rgba($primary, 0.3);
     }
 
     &::-moz-selection {
-      background-color: rgba($greenyellow, 0.3);
+      background-color: rgba($primary, 0.3);
     }
 
     &::-webkit-input-placeholder {
@@ -387,8 +400,8 @@ $modal-content-bgColor: $slate900;
     color: $slate400;
 
     &:hover {
-      color: $greenyellow;
-      border-color: $greenyellow;
+      color: $primary;
+      border-color: $primary;
     }
   }
 
