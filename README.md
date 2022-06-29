@@ -9,9 +9,9 @@ This application is a proof of concept for a room booking system for Cola Day 20
 
 ## Features
 - shows meeting rooms availability
-- allows users to book meeting rooms
+- allows users to book meeting rooms by the hour (up to 4 hours per event)
 - allows users to cancel their booking
-- stores data in blockChain (Ropsten Test Net)
+- stores data in blockChain (Ropsten Test Network)
 - encrypts event titles with public key encryption (end to end)
 
 ## Usage

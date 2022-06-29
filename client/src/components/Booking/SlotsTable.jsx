@@ -176,7 +176,7 @@ export default class SlotsTable extends React.Component {
       }
 
       this.setState({ selectionStarted: false })
-      this.props.onChange(value, selected)
+      this.props.onChange(selected, this.state.addMode)
     }
   };
 
