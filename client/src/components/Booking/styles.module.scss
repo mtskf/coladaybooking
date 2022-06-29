@@ -71,10 +71,10 @@ $modal-content-bgColor: $slate900;
   user-select: none;
   border-collapse: collapse;
 
-  thead {
+  thead tr {
     position: sticky;
     top: -1px;
-    z-index: 2;
+    z-index: 10;
   }
   thead th {
     color: $slate400;

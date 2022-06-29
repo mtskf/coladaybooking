@@ -30,7 +30,7 @@ const SnackBar = ({ snack, setSnack }: PropType) => {
 
   return (
     <Snackbar
-      anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       open={isActive}
       autoHideDuration={DURATION}
       onClose={handleClose}

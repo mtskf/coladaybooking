@@ -48,6 +48,7 @@ function EthProvider ({ children }) {
   useEffect(() => {
     const events = ["chainChanged", "accountsChanged", "disconnect"]
     const handleChange = () => {
+      console.log('something has changed...')
       dispatch({
         type: actions.init,
         data: initialState
