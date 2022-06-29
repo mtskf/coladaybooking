@@ -27,7 +27,7 @@ function TicketItem ({ ticket, isPending, onClickTicket }: PropsType) {
             : ticket.isEncrypted && <Lock />
         }
       </div>
-      <small>{ticket.from}:00</small>
+      <small>{ticket.from}:00{ticket.duration > 1 && ` - ${ticket.to}:00`}</small>
       {ticket.decryptedTitle
         ? <span>{ticket.decryptedTitle}</span>
         : ticket.isEncrypted
