@@ -399,8 +399,8 @@ function BookingModule () {
         colHeader={HOURS}
         rowHeader={ROOM_NAMES}
         onChange={handleSelectSlots}
-        onSelectionStart={(event: Event) => console.log("start", event)}
-        onInput={(event: Event) => console.log("event", event)}
+        // onSelectionStart={(event: Event) => console.log("start", event)}
+        // onInput={(event: Event) => console.log("event", event)}
         onClickTicket={handleClickTicket}
       />
 
