@@ -100,6 +100,8 @@ export default class SlotsTable extends React.Component {
               selected={this.props.value[i][j].selected}
               disabled={this.props.value[i][j].disabled}
               booked={this.props.value[i][j].booked}
+              making={this.props.value[i][j].making}
+              deleting={this.props.value[i][j].deleting}
               ticket={this.props.value[i][j].ticket}
               selecting={this.isCellSelecting(i, j)}
               onClickTicket={this.props.onClickTicket}
@@ -143,9 +145,9 @@ export default class SlotsTable extends React.Component {
             : Math.abs(column - startColumn) + 1
 
         const selectedColumns = range(startColumn, column)
-        const isDisabledIncluded = selectedColumns.some(col => this.props.value[selectedRow][col].disabled)
+        const isDisabledOrBookedIncluded = selectedColumns.some(col => this.props.value[selectedRow][col].disabled || this.props.value[selectedRow][col].booked)
 
-        if (nextColumnCount <= this.props.maxCols && !isDisabledIncluded) {
+        if (nextColumnCount <= this.props.maxCols && !isDisabledOrBookedIncluded) {
           this.setState({ endColumn: column })
         }
       }

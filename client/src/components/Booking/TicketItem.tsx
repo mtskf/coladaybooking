@@ -4,22 +4,23 @@ import { Ticket } from "types";
 
 interface PropsType {
   ticket: Ticket;
+  isPending: boolean;
   onClickTicket: any;
 }
 
-function TicketItem ({ ticket, onClickTicket }: PropsType) {
+function TicketItem ({ ticket, isPending, onClickTicket }: PropsType) {
 
   return (
     <div
       className={styles.ticket}
       data-duration={ticket.duration}
       data-encrypted={ticket.isEncrypted}
-      data-pending={ticket.isPending}
+      data-pending={isPending}
       onClick={e => onClickTicket(e, ticket)}
       style={{ width: `calc(${ticket.duration}00% + ${ticket.duration - 5}px)` }}
     >
       <div className={styles.ticketIcon}>
-        {ticket.isPending && <Autorenew />}
+        {isPending && <Autorenew className={styles.rotating} />}
         {
           ticket.decryptedTitle
             ? <LockOpen />

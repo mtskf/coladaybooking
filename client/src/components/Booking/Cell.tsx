@@ -9,6 +9,8 @@ interface PropsType {
   disabled: boolean;
   selecting: boolean;
   booked: boolean;
+  making: boolean;
+  deleting: boolean;
   ticket?: Ticket;
   decrypted: boolean;
   onTouchStart: any;
@@ -22,7 +24,7 @@ function Cell ({ ...props }: PropsType) {
   const nextProps = useMemo<PropsType>(() => {
     return { ...props }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.selecting, props.selected, props.disabled, props.decrypted, props.ticket])
+  }, [props.selecting, props.selected, props.disabled, props.decrypted, props.booked, props.making, props.deleting])
 
   const tdRef = useRef<HTMLTableCellElement>(null);
 
@@ -53,16 +55,18 @@ function Cell ({ ...props }: PropsType) {
     }
   }, []);  // eslint-disable-line
 
-  // }, [props.selecting, props.selected, props.disabled, props.decrypted, props.ticket]);  // eslint-disable-line
-
   const classNames = useMemo(() => {
     const classNames = []
+    if (props.ticket) {
+      classNames.push(styles.hasTicket)
+    }
 
     if (props.booked) {
       classNames.push(styles.booked)
-      if (props.ticket) {
-        classNames.push(styles.hasTicket)
-      }
+    } else if (props.making) {
+      classNames.push(styles.making);
+    } else if (props.making) {
+      classNames.push(styles.deleting);
     }
 
     if (props.disabled) {
@@ -79,7 +83,7 @@ function Cell ({ ...props }: PropsType) {
 
     return classNames;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.selecting, props.selected, props.disabled, props.decrypted, props.ticket])
+  }, [props.selecting, props.selected, props.disabled, props.decrypted, props.booked, props.making, props.deleting])
 
   return (
     <td
@@ -88,7 +92,7 @@ function Cell ({ ...props }: PropsType) {
       onMouseDown={handleTouchStart}
       onMouseMove={handleTouchMove}
     >
-      {nextProps.ticket && <TicketItem ticket={nextProps.ticket!} onClickTicket={nextProps.onClickTicket} />}
+      {nextProps.ticket && <TicketItem isPending={nextProps.making || nextProps.deleting} ticket={nextProps.ticket!} onClickTicket={nextProps.onClickTicket} />}
       <p>{ }</p>
     </td>
   );

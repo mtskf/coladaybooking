@@ -8,19 +8,19 @@ interface PropType {
   isActive: boolean;
   cancel: any;
   newTicket: Ticket;
-  save: any;
+  saveTicket: any;
   getPublicKey: any;
 }
 
 
-function NewTicketModal ({ isActive, cancel, newTicket, save, getPublicKey }: PropType) {
+function NewTicketModal ({ isActive, cancel, newTicket, saveTicket, getPublicKey }: PropType) {
   const [isEncrypting, setIsEncrypting] = useState(false);
   const titleInputRef = useRef() as React.MutableRefObject<HTMLInputElement>;
 
   const submit = (e: React.FormEvent<HTMLFormElement> | KeyboardEvent) => {
     e.preventDefault();
     const title = titleInputRef.current.value;
-    save({ ...newTicket, title, isEncrypted: isEncrypting, isPending: true });
+    saveTicket({ ...newTicket, title, isEncrypted: isEncrypting });
   }
 
   const cancelHandler = (e: React.MouseEvent | KeyboardEvent) => {
