@@ -12,9 +12,8 @@ import SlotsTable from "./SlotsTable.jsx";
 import SnackBar from "./SnackBar";
 import TableReference from "./TableReference";
 import rooms from "./RoomNames";
-import { Ticket, Slot, Snack } from "types";
+import { Ticket, Snack } from "types";
 import styles from "./styles.module.scss";
-import { cloneDeep } from "lodash";
 
 const OPEN_AT = 8;
 const CLOSE_AT = 18;
@@ -22,13 +21,11 @@ const SLOT_LENGTH = CLOSE_AT - OPEN_AT;
 const HOURS = [...Array(SLOT_LENGTH)].map((x, i) => `${i + OPEN_AT}:00`);
 const ROOM_NAMES = rooms;
 const TOMORROW = format(add(new Date(), { days: 1 }), 'd MMM, yyyy');
-const DEFAULT_SLOTS = [...Array(ROOM_NAMES.length)].map(() => [...Array(SLOT_LENGTH)].map((x) => {
-  return { selected: false, disabled: false, booked: false, making: false, deleting: false, decrypted: false };
-}))
+const DEFAULT_SLOTS = [...Array(ROOM_NAMES.length)].map(() => [...Array(SLOT_LENGTH)].map((x) => false));
 const DEFAULT_TICKET = { roomId: 0, room: "", from: 0, to: 0, duration: 0, date: "", }
+
 const decryptedTitlesCache: string[] = [];
 let publicKey: Buffer | undefined;
-const slotsCache: Slot[][] = DEFAULT_SLOTS;
 
 const encryptWithPublicKey = (publicKey: Buffer, message: string) => {
   return bufferToHex(
@@ -49,8 +46,11 @@ function BookingModule () {
   const { state } = useEth()
   const { state: { contract, accounts } } = useEth()
 
-  const [slots, setSlots] = useState<Slot[][]>(DEFAULT_SLOTS);
-  const [newTicket, setNewTicket] = useState<Ticket>(DEFAULT_TICKET)
+  const [slots, setSlots] = useState<boolean[][]>(DEFAULT_SLOTS);
+  const [tickets, setTickets] = useState<Ticket[][]>([]);
+  const [selected, setSelected] = useState<boolean[][]>([]);
+
+  const [newTicket, setNewTicket] = useState<Ticket>(DEFAULT_TICKET);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [newTicketModalShown, setNewTicketModalShown] = useState(false);
   const [ticketInfoModalShown, setTicketInfoModalShown] = useState(false);
@@ -58,24 +58,14 @@ function BookingModule () {
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  const updateSlots = () => {
-    setSlots(cloneDeep(slotsCache));
-  }
   const getSlots = async () => {
+    // get users' tickets data from the blockchain
     try {
       const res = await contract.methods.getSlots().call({ from: accounts[0] });
-
       if (!res || res.status === '0x0') {
-        throw new Error('Booking failed');
+        throw new Error('Faild getting slots.');
       }
-
-      res.forEach((room: any, row: number) =>
-        room.forEach((isAvailable: boolean, col: number) => {
-          slotsCache[row][col].disabled = !isAvailable;
-        })
-      );
-
-      updateSlots();
+      setSlots(res);
     } catch (err) {
       setSnack({ message: 'Error - Failed to retrieve data... Try reloading the page.', type: 'error', isActive: true });
       return;
@@ -83,6 +73,7 @@ function BookingModule () {
   }
 
   const getTickets = async () => {
+    // get the latest slots availability data from the blockchain
     try {
       const res = await contract.methods.getTickets().call({ from: accounts[0] })
 
@@ -90,63 +81,94 @@ function BookingModule () {
         throw new Error('Faild getting tickets.');
       }
 
-      // filter out deleted events
-      const activeTickets = res.filter((ticket: any) =>
-        ticket.isActive).map((ticket: any) => {
-          const { title, room, isEncrypted } = ticket;
-          const id = Number(ticket.id);
-          const from = Number(ticket.from);
-          const duration = Number(ticket.duration);
-          const roomId = ROOM_NAMES.indexOf(room);
-          const to = from + duration;
-          const date = TOMORROW;
-          const decryptedTitle = decryptedTitlesCache[id];
-          return { id, title, room, roomId, from, to, duration, date, isEncrypted, decryptedTitle };
-        });
+      const newTickets: Ticket[][] = [];
 
-      // clear user's tickets data attached to slotsCache
-      for (const row of slotsCache) {
-        for (const slot of row) {
-          if (slot.booked && !slot.making && !slot.deleting) {
-            slot.booked = false;
-            delete slot.ticket;
-          }
-        }
-      }
+      // filter out deleted events, and update tickets
+      res.filter((ticket: any) => ticket.isActive).forEach((ticket: Ticket) => {
+        const { title, room, isEncrypted } = ticket;
+        const id = Number(ticket.id);
+        const from = Number(ticket.from);
+        const duration = Number(ticket.duration);
+        const roomId = ROOM_NAMES.indexOf(room);
+        const to = from + duration;
+        const date = TOMORROW;
+        const decryptedTitle = decryptedTitlesCache[id];
+        const newTicket = { id, title, room, roomId, from, to, duration, date, isEncrypted, decryptedTitle };
+        const col = roomId;
+        const row = from - OPEN_AT;
+        tickets[row][col] = newTicket;
+      });
 
-      // apply the latest tickets data to the respective slotsCache
-      for (const ticket of activeTickets) {
-        const row = ticket.roomId;
-        const col = ticket.from - OPEN_AT;
-        const duration = ticket.duration;
-
-        for (let i = 0; i < duration; i++) {
-          const slot = slotsCache[row][col + i];
-          if (!slot.deleting) {
-            i === 0 && (slot.ticket = ticket!);
-            slot.booked = true;
-            slot.making = false;
-          }
-        }
-      }
-
-      updateSlots();
-
+      setTickets(tickets);
+      setTickets(activeTickets);
     } catch (err) {
       setSnack({ message: 'Error - Failed to retrieve data... Try reloading the page.', type: 'error', isActive: true });
       return;
     }
   }
 
-  const loadSlots = async () => {
-    await getSlots();
-    await getTickets();
+
+  // const updateSlots = async () => {
+  //   // apply new slots data to the slotsTable
+  //   try {
+  //     const res = await getSlots();
+
+  //     slots.forEach((room: Slot[], row: number) =>
+  //       room.forEach((slot: Slot, col: number) => {
+  //         slot.disabled = !res[row][col] as boolean;
+  //       })
+  //     )
+
+  //     setSlots(slots);
+
+  //   } catch (err) {
+  //     console.error(err);
+  //     setSnack({ message: 'Error - Failed to retrieve data... Try reloading the page.', type: 'error', isActive: true });
+  //     return;
+  //   }
+  // }
+
+
+  const updateTickets = async () => {
+    // apply the latest tickets data to the respective slots
+    try {
+      const newTickets = await getActiveTickets();
+
+      // clear user's tickets data attached to the slotsTable
+      for (const room of slots) {
+        for (const slot of room) {
+          if (slot.booked) {
+            slot.booked = false;
+            if (slot.ticket) {
+              delete slot.ticket;
+            }
+          }
+        }
+      }
+
+      for (const ticket of newTickets) {
+        const row = ticket.roomId;
+        const col = ticket.from - OPEN_AT;
+        const duration = ticket.duration;
+
+        for (let i = 0; i < duration; i++) {
+          const slot = slots[row][col + i];
+          i || (slot.ticket = ticket!);
+          slot.booked = true;
+        }
+      }
+
+      setSlots(slots);
+
+    } catch (err) {
+      setSnack({ message: 'Error - Failed to retrieve data... Try reloading the page.', type: 'error', isActive: true });
+    }
   }
 
   const resetSelection = () => {
     // deselect slots
-    slotsCache.forEach(room => room.forEach(slot => slot.selected = false));
-    updateSlots();
+    slots.forEach(room => room.forEach(slot => slot.selected = false));
+    setSlots(slots);
   };
 
   const cancelNewTicket = () => {
@@ -158,10 +180,11 @@ function BookingModule () {
   const saveTicket = async (ticket: Ticket) => {
     // save the new event to the blockchain
 
+    let title = ticket.title;
+    const { room, roomId, from, duration, isEncrypted } = ticket;
+
     // show loading spinner
     setIsLoading(true);
-
-    const { title, room, roomId, from, duration, isEncrypted } = ticket;
 
     // hide modal
     setNewTicketModalShown(false);
@@ -180,7 +203,7 @@ function BookingModule () {
         throw new Error('Public key is not available');
       }
       try {
-        ticket.title = encryptWithPublicKey(publicKey!, title ?? ' ');
+        title = encryptWithPublicKey(publicKey!, title ?? ' ');
       } catch (err) {
         cancelNewTicket();
         setSnack({ message: 'Error - Encryption failded... Try later.', type: 'error', isActive: true });
@@ -191,30 +214,33 @@ function BookingModule () {
     // update slots - add pending ticket
     const row = roomId;
     const col = from - OPEN_AT;
-    slotsCache[row][col].ticket = ticket;
+    slots[row][col].ticket = { ...ticket, title };
     for (let i = 0; i < duration; i++) {
-      slotsCache[row][col + i].making = true;
+      slots[row][col + i].disabled = true;
+      slots[row][col + i].booked = true;
     }
-    updateSlots();
+    setSlots(slots);
 
     // hide loading spinner
     setIsLoading(false);
 
     // send event data to contract
     try {
-      const res = await contract.methods.book(ticket.title, room, from, duration, isEncrypted).send({ from: accounts[0] })
+      const res = await contract.methods.book(title, room, from, duration, isEncrypted).send({ from: accounts[0] })
       if (!res || res.status === '0x0') {
         throw new Error('Booking failed');
       }
     } catch (err) {
 
       // TODO: remove pending ticket
-      if (slotsCache[row][col].making) {
-        delete slotsCache[row][col].ticket;
+      if (slots[row][col].ticket.isPending) {
+        console.log('deleting pending ticket')
+        delete slots[row][col].ticket;
         for (let i = 0; i < duration; i++) {
-          slotsCache[row][col + i].making = false;
+          slots[row][col + i].disabled = false;
+          slots[row][col + i].booked = false;
         }
-        updateSlots();
+        setSlots(slots);
       }
 
       cancelNewTicket();
@@ -229,47 +255,45 @@ function BookingModule () {
     setSnack({ message: 'Event saved!', type: 'success', isActive: true });
   }
 
-  const deleteTicket = async (ticket: Ticket) => {
+  const removeTicket = async (ticket: Ticket) => {
+    // remove the event from the blockchain
 
-    const row = ticket.roomId;
-    const col = ticket.from - OPEN_AT;
-    const duration = ticket.duration;
-
-    // hide modal
-    setTicketInfoModalShown(false);
+    // show loading spinner
+    setIsLoading(true);
 
     // TODO: make the ticket pending
-    for (let i = 0; i < duration; i++) {
-      slotsCache[row][col + i].deleting = true;
-    }
-    updateSlots();
 
     try {
-      // remove the event from the blockchain
-      const res = await contract.methods.deleteTicket(ticket.id).send({ from: accounts[0] })
-
+      const res = await contract.methods.removeTicket(ticket.id).send({ from: accounts[0] })
       if (res.status === '0x0') {
         throw new Error('Transaction failed');
       }
-
-      delete slotsCache[row][col].ticket;
-      for (let i = 0; i < duration; i++) {
-        slotsCache[row][col + i].deleting = false;
-      }
-      updateSlots();
-
-      // show success message
-      setSnack({ message: 'Event deleted!', type: 'success', isActive: true });
-
     } catch (err) {
-      console.log('error', err)
-      // clear the pending state of the ticket
-      for (let i = 0; i < duration; i++) {
-        slotsCache[row][col + i].deleting = false;
-      }
-      updateSlots();
+      // TODO: rollback pending state of the ticket
       setSnack({ message: 'Error - Failed to delete event... Try later.', type: 'error', isActive: true });
+      setIsLoading(false);
+      return;
     }
+
+    // update slots
+    const row = ticket.roomId;
+    const col = ticket.from - OPEN_AT;
+    for (let i = 0; i < ticket.duration; i++) {
+      slots[row][col + i].disabled = false;
+      slots[row][col + i].booked = false;
+    }
+    delete slots[row][col].ticket;
+    setSlots(slots);
+
+    // close modal
+    setTicketInfoModalShown(false);
+    if (selectedTicket) setSelectedTicket(null);
+
+    // hide loading spinner
+    setIsLoading(false);
+
+    // show success message
+    setSnack({ message: 'Event deleted!', type: 'success', isActive: true });
   }
 
   const handleSelectSlots = async (slots: any[], selected: any[]) => {
@@ -321,8 +345,6 @@ function BookingModule () {
   const decryptTicketTitle = async (ticket: Ticket) => {
     if (!ticket.isEncrypted || ticket.id === undefined || decryptedTitlesCache[ticket.id]) return;
 
-    setIsLoading(true);
-
     await window.ethereum
       .request({
         method: 'eth_decrypt',
@@ -330,14 +352,13 @@ function BookingModule () {
       })
       .then((decryptedTitle: string) => {
         decryptedTitlesCache[ticket.id!] = decryptedTitle;
-        const slot = slotsCache[ticket.roomId][ticket.from - OPEN_AT]
+        const slot = slots[ticket.roomId][ticket.from - OPEN_AT]
         slot.ticket.decryptedTitle = decryptedTitle;
         setSelectedTicket(slot.ticket);
-        setSlots(slotsCache);
-        setIsLoading(false);
+        setSlots([...slots]);
       })
       .catch((error: Error) => {
-        setIsLoading(false);
+        console.error(error.message)
         setSnack({ message: 'Error - Failed to decrypt... Try later.', type: 'error', isActive: true });
       });
   }
@@ -361,8 +382,8 @@ function BookingModule () {
 
     // initial data load
     const initialLoad = async () => {
-      setIsLoading(true);
-      await loadSlots();
+      await updateSlots();
+      await updateTickets();
       setIsLoading(false);
     }
     initialLoad();
@@ -370,12 +391,12 @@ function BookingModule () {
 
     // Event listener - when event "Updated" monitored, load data
     contract.events.Updated()
-      .on("data", loadSlots)
+      .on("data", updateSlots)
       .on("error", console.error);
 
     // remove event listener when unmount
     return () =>
-      contract.events.Updated().removeListener("data", loadSlots)
+      contract.events.Updated().removeListener("data", updateSlots)
 
   }, [accounts]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -409,14 +430,14 @@ function BookingModule () {
         isActive={newTicketModalShown}
         cancel={cancelNewTicket}
         newTicket={newTicket}
-        saveTicket={saveTicket}
+        save={saveTicket}
         getPublicKey={getPublicKey}
       />
 
       <TicketInfoModal
         isActive={ticketInfoModalShown}
         ticket={selectedTicket}
-        deleteTicket={deleteTicket}
+        remove={removeTicket}
         close={() => setTicketInfoModalShown(false)}
         decryptTicketTitle={decryptTicketTitle}
       />
@@ -438,7 +459,7 @@ function BookingModule () {
           !state.contract ? <NoticeWrongNetwork /> :
             EventTable
       }
-    </div>
+    </div >
   )
 }
 

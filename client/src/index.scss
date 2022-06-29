@@ -1,6 +1,6 @@
-@import url('//fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-
+@import url("https://use.typekit.net/yhr7yba.css");
 @import 'assets/scss/_variables';
+@import 'assets/scss/_media_queries';
 @import 'assets/scss/_bulma';
 
 html, body, p, ol, ul, li, dl, dt, dd, blockquote, figure, fieldset, legend, textarea, pre, iframe, hr, h1, h2, h3, h4, h5, h6 {
@@ -8,13 +8,21 @@ html, body, p, ol, ul, li, dl, dt, dd, blockquote, figure, fieldset, legend, tex
   padding: 0
 }
 
-html { box-sizing: border-box; }
+html {
+  background-color: $slate900;
+  box-sizing: border-box;
+  font-size: 100%;
+  @include mq(xs) { font-size: 80%; }
+  @include mq(sm) { font-size: 90%; }
+  @include mq(lg) { font-size: 110%; }
+  @include mq(xl) { font-size: 120%; }
+  @include mq(xxl) { font-size: 130%; }
+}
 
 body {
   min-height: 100vh;
   max-width: 100vw;
-  font-family: 'Poppins', sans-serif;
-  font-size: 16px;
+  font-family: 'new-hero', sans-serif;
   line-height: 1.4;
   background-color: $slate900;
   color: $slate200;
@@ -51,38 +59,15 @@ a {
   text-decoration: none;
 }
 
-// input[type="number"],
-// input[type="text"] {
-//   -webkit-appearance: none;
-//   -moz-appearance: none;
-//   appearance: none;
-//   outline: none !important;
-//   -moz-appearance: textfield;
-
-//   display: block;
-//   height: 2.5rem;
-//   margin: 0;
-//   padding-left: 0.75rem;
-//   padding-right: 0.75rem;
-//   border-radius: 0.5rem;
-//   border: 0;
-//   border: none;
-//   background-image: linear-gradient(to left top, #f7f9fb, #f3f6f9, #eff3f7, #ebf0f5, #e7edf3);
-//   box-shadow: inset 0.1875rem 0.1875rem 0.5625rem rgba(#24415d, 0.1),
-//     inset -0.1875rem -0.1875rem 0.5625rem rgba(#fff, 0.1);
-//   font-size: 1rem;
-// }
-
-
-
-
 .flex {
   display: flex;
 }
+
 .flex_bottom {
   @extend .flex;
   align-items: flex-end;
 }
+
 .gap5 {
   gap: 0.5rem;
 }
@@ -100,11 +85,11 @@ input {
     }
   }
 }
-label {
-  // @extend .label;
-}
-
 
 body > iframe {
   display: none;
+}
+
+.button {
+  font-weight: bold;
 }

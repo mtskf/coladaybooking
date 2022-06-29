@@ -1,15 +1,68 @@
 @import 'assets/scss/_variables';
+@import 'assets/scss/_media_queries';
 
 $modal-content-width: 24rem;
 $modal-overlay-bgColor: rgba($slate800, 0.85);
 $modal-content-bgColor: $slate900;
 
+.bookingModule {
+  transition: opacity 0.8s ease;
 
-.tableContainer {
-  min-width: 480px;
-  margin: 2rem 0;
+  &:not([data-initialized="true"]) {
+    opacity: 0;
+    visibility: hidden;
+  }
 }
 
+.tableContainer {
+  max-width: 100%;
+  @include mq(xl-up) {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}
+
+.tableReference {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  max-width: 100%;
+  margin-bottom: 1rem;
+  padding: 0 2rem;
+  font-size: 0.75rem;
+  color: $slate400;
+  @include mq(xl-up) {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0;
+  }
+
+  & > li {
+    display: flex;
+    gap: 0.5rem;
+    &:before {
+      content: "";
+      display: block;
+      width: 1rem;
+      height: 1rem;
+    }
+    &[data-type="disabled"]:before {
+      border: 1px solid $slate500;
+      background-color: $slate700;
+    }
+    &[data-type="ticket"]:before {
+      border: 1px solid $primary;
+      border-left-width: 0.3rem;
+      border-radius: 0.15rem;
+      background-color: rgba($primary, 0.1);
+    }
+    &[data-type="pending"]:before {
+      border: 1px dashed rgba($primary, 0.5);
+      border-radius: 0.15rem;
+      background-color: rgba($primary, 0.1);
+    }
+  }
+}
 
 .slotsTable {
   width: 100%;
@@ -18,23 +71,26 @@ $modal-content-bgColor: $slate900;
   user-select: none;
   border-collapse: collapse;
 
-
+  thead tr {
+    position: sticky;
+    top: -1px;
+    z-index: 10;
+  }
   thead th {
     color: $slate400;
     font-size: 0.8rem;
     font-weight: normal;
+    padding: 1rem 0 0.5rem;
+    border: none;
+    background-color: rgba($slate900, 0.95);
 
     &:first-child {
-      width: 4rem;
+      width: 15vw;
+      min-width: 7.5rem;
+      @include mq(xl-up) {
+        width: 10rem;
+      }
     }
-  }
-
-  tbody th:first-child {
-    width: 4rem;
-    background-color: darken($slate900, 4%);
-    color: $slate200;
-    text-align: center;
-    vertical-align: middle;
   }
 
   tbody {
@@ -44,20 +100,38 @@ $modal-content-bgColor: $slate900;
       }
 
       &>th {
-        color: $greenyellow;
+        color: $primary;
         background-color: darken($slate900, 10%);
+      }
+    }
+
+    th {
+      position: sticky;
+      left: 0;
+      width: 4rem;
+      background-color: darken($slate900, 4%);
+      color: $slate200;
+      transition: all 0.4s ease;
+      text-align: center;
+      vertical-align: middle;
+      font-size: 1rem;
+      font-weight: 500;
+      & > img {
+        display: inline-block;
+        width: 1rem;
+        height: 1rem;
+        margin-right: 0.5rem;
+        vertical-align: -0.05rem;
       }
     }
   }
 
   th {
-    transition: all 0.4s ease;
+    border: 1px solid transparent;
   }
-
   td {
-    text-align: center;
-    text-overflow: ellipsis;
-    overflow: hidden;
+    position: relative;;
+    overflow: visible;
     border: 1px solid transparent;
     box-sizing: border-box;
     background-clip: padding-box;
@@ -65,6 +139,10 @@ $modal-content-bgColor: $slate900;
     padding: 0.25rem;
     vertical-align: middle;
     transition: all 0.4s ease;
+
+    &:nth-child(2) {
+      border-left-width: 3px;
+    }
 
     &.enabled {
       background-color: darken($slate900, 4%);
@@ -77,7 +155,7 @@ $modal-content-bgColor: $slate900;
     }
 
     &.selecting {
-      background-color: $greenyellow;
+      background-color: $primary;
     }
 
     &.selected {
@@ -88,9 +166,12 @@ $modal-content-bgColor: $slate900;
       background-color: darken($slate900, 3%);
     }
 
-    &.hasChild {
-      position: relative;
-      overflow: visible;
+    &.making {
+      background-color: darken($slate900, 3%);
+    }
+
+    &.hasTicket {
+      z-index: 2;
     }
   }
 }
@@ -103,29 +184,40 @@ $modal-content-bgColor: $slate900;
   width: 100%;
   height: calc(100% - 4px);
   padding: 0.2rem 0.4rem 0;
-  background-color: rgba($greenyellow, 0.1);
-  border: 1px solid $greenyellow;
+  background-color: rgba($primary, 0.1);
+  border: 1px solid $primary;
   border-left-width: 0.3rem;
   border-radius: 0.25rem;
-  box-shadow: 0 0.25rem 1rem rgba($greenyellow, 0.1);
-  color: $greenyellow;
+  box-shadow: 0 0.25rem 1rem rgba($primary, 0.1);
+  color: $primary;
   line-height: 1.1;
   cursor: pointer;
   transition: all 0.3s ease;
+  &[data-pending="true"] {
+    border-style: dashed;
+    border-left-width: 1px;
+    border-color: rgba($primary, 0.5);
+    color: rgba($primary, 0.7);
+  }
 
   &:hover {
     z-index: 10;
     border-color: $lime;
-    background-color: rgba($greenyellow, 0.2);
-    box-shadow: 0 0.25rem 1rem rgba($greenyellow, 0.3);
+    background-color: rgba($primary, 0.2);
+    box-shadow: 0 0.25rem 1rem rgba($primary, 0.3);
   }
 
-  &>svg {
+  &Icon {
     position: absolute;
     top: 0.25rem;
     right: 0.25rem;
-    width: 0.65rem;
-    height: 0.65rem;
+    display: flex;
+    gap: 0.1rem;
+    & > svg {
+      display: block;
+      width: 0.65rem;
+      height: 0.65rem;
+    }
   }
 
   &>small {
@@ -143,6 +235,18 @@ $modal-content-bgColor: $slate900;
     font-size: 0.8rem;
   }
 }
+@keyframes rotation {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(359deg);
+    }
+}
+
+.rotating {
+  animation: rotation 2s infinite linear;
+}
 
 .snackBar {
   z-index: $zindex-alerts;
@@ -157,7 +261,7 @@ $modal-content-bgColor: $slate900;
     font-weight: bold;
 
     &[data-type="success"] {
-      background-color: lime;
+      background-color: $primary;
       color: $slate900;
     }
 
@@ -175,9 +279,6 @@ $modal-content-bgColor: $slate900;
 
   // font-weight: bold;
 }
-
-
-
 
 .modal {
   position: fixed;
@@ -253,15 +354,15 @@ $modal-content-bgColor: $slate900;
     border-radius: 0;
     border: none;
     border-bottom: 1px solid $slate600;
-    caret-color: $greenyellow;
+    caret-color: $primary;
     font-size: 1.125rem;
 
     &::selection {
-      background-color: rgba($greenyellow, 0.3);
+      background-color: rgba($primary, 0.3);
     }
 
     &::-moz-selection {
-      background-color: rgba($greenyellow, 0.3);
+      background-color: rgba($primary, 0.3);
     }
 
     &::-webkit-input-placeholder {
@@ -315,8 +416,8 @@ $modal-content-bgColor: $slate900;
     color: $slate400;
 
     &:hover {
-      color: $greenyellow;
-      border-color: $greenyellow;
+      color: $primary;
+      border-color: $primary;
     }
   }
 
@@ -389,8 +490,6 @@ $modal-content-bgColor: $slate900;
   }
 }
 
-
-
 .customSwitch {
   display: flex !important;
   flex-direction: row-reverse;
@@ -456,5 +555,50 @@ $modal-content-bgColor: $slate900;
       flex-grow: 1;
       flex-shrink: 1;
     }
+  }
+}
+
+.notice {
+  padding: 4rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+
+  @include mq(xl-up) {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  &Image {
+    position: relative;
+    margin: 0 auto 2rem;
+    img {
+      &:first-child {
+        display: block;
+        width: 10rem;
+        height: 10rem;
+      }
+      &:last-child {
+        position: absolute;
+        right: 0.5rem;
+        bottom: 0.5rem;
+        display: block;
+        width: 2rem;
+        height: 2rem;
+        color: $red;
+      }
+    }
+  }
+
+  h2 {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+
+  button {
+    margin-top: 2rem;
   }
 }

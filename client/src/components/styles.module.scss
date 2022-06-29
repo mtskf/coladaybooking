@@ -1,0 +1,111 @@
+@import 'assets/scss/_variables';
+@import 'assets/scss/_media_queries';
+
+$navbar-background-color: $slate900;
+$navbar-item-color: #fff;
+
+.navbar {
+  padding: 0 2rem;
+
+  @include mq(xl-up) {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0;
+  }
+
+  &__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    height: 10rem;
+    @include mq(sm-down) {
+      height: 8rem;
+    }
+  }
+
+  &__brand {
+    display: flex;
+    align-items: center;
+
+    img {
+      display: block;
+      width: 2.1rem;
+      height: 2.8rem;
+    }
+
+    h1 {
+      margin-left: 0.5rem;
+      ;
+      font-size: 1.1rem;
+      line-height: 1.25;
+      font-weight: 900;
+    }
+  }
+
+  p {
+    text-align: center;
+    line-height: 1.6;
+    font-size: 0.925rem;
+    font-weight: bold;
+  }
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 2.5rem;
+    background-color: $slate700;
+    color: $slate100;
+    border: 0;
+    font-weight: bold;
+    font-size: 0.875rem;
+
+    &>svg {
+      display: block;
+      width: 1.25rem;
+      height: 1.25rem;
+      margin-left: -0.15rem;
+      ;
+    }
+
+    &:hover {
+      color: $primary;
+    }
+  }
+}
+
+.footer {
+  padding: 4rem 2rem;
+
+  @include mq(xl-up) {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  h2 {
+    font-size: 0.75rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+
+  ul {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+  }
+  a {
+    display: block;
+    color: #fff;
+    transition: all 0.3s ease;
+    &:hover {
+      color: $primary;
+      transform: translateY(-2px);
+    }
+  }
+  svg {
+    width: 1rem;
+    height: 1rem;
+  }
+}

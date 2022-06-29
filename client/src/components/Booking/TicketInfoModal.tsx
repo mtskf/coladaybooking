@@ -6,12 +6,12 @@ import styles from "./styles.module.scss";
 interface PropsType {
   isActive: boolean;
   ticket: Ticket | null;
-  remove: any;
+  deleteTicket: any;
   close: any;
   decryptTicketTitle: any;
 }
 
-function TicketInfoModal ({ isActive, ticket, remove, close, decryptTicketTitle }: PropsType) {
+function TicketInfoModal ({ isActive, ticket, deleteTicket, close, decryptTicketTitle }: PropsType) {
 
   useEffect(() => {
     if (!isActive) return;
@@ -58,7 +58,7 @@ function TicketInfoModal ({ isActive, ticket, remove, close, decryptTicketTitle 
         <small>{ticket.date}&nbsp;&nbsp;{ticket.from}:00 to {ticket.to}:00&nbsp;&nbsp;&nbsp;&nbsp;Room {ticket.room}</small>
 
         <div className="buttons">
-          <button className="button is-simple is-rounded" onClick={() => remove(ticket)}><DeleteForever />Delete</button>
+          <button className="button is-simple is-rounded" onClick={() => deleteTicket(ticket)}><DeleteForever />Delete</button>
           <button className="button is-primary is-rounded" onClick={close}>OK</button>
         </div>
 

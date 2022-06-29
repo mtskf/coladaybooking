@@ -33,6 +33,7 @@ yarn.lock
 .node-version
 
 #truffle
+secrets.json
 .tern-port
 .truffle-solidity-loader
 .vagrant/**

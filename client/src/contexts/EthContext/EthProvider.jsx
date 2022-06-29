@@ -19,9 +19,9 @@ function EthProvider ({ children }) {
           address = artifact.networks[networkID].address
           contract = new web3.eth.Contract(abi, address)
         } catch (err) {
-          alert(
-            `Failed to load web3, accounts, or contract. Check console for details.`,
-          )
+          // alert(
+          //   `Failed to load web3, accounts, or contract. Check console for details.`,
+          // )
           console.error(err)
         }
         dispatch({
@@ -46,10 +46,14 @@ function EthProvider ({ children }) {
   }, [init])
 
   useEffect(() => {
-    const events = ["chainChanged", "accountsChanged"]
+    const events = ["chainChanged", "accountsChanged", "disconnect"]
     const handleChange = () => {
-      // init(state.artifact)
-      window.location.reload()
+      console.log('something has changed...')
+      dispatch({
+        type: actions.init,
+        data: initialState
+      })
+      init(state.artifact)
     }
 
     events.forEach(e => window.ethereum.on(e, handleChange))

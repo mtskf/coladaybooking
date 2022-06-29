@@ -1,8 +1,11 @@
 import React from "react"
-import { cloneDeep } from "lodash"
+import { cloneDeep, range } from "lodash"
 import PropTypes from "prop-types"
 import styles from "./styles.module.scss"
 import Cell from "./Cell"
+import cokeIcon from "assets/img/coke.svg"
+import pepsiIcon from "assets/img/pepsi.svg"
+
 
 export default class SlotsTable extends React.Component {
   static propTypes = {
@@ -30,8 +33,7 @@ export default class SlotsTable extends React.Component {
     },
     rows: PropTypes.number,
     cols: PropTypes.number,
-    maxRows: PropTypes.number,
-    maxColumns: PropTypes.number,
+    maxCols: PropTypes.number,
     onSelectionStart: PropTypes.func,
     onInput: PropTypes.func,
     onChange: PropTypes.func,
@@ -40,8 +42,7 @@ export default class SlotsTable extends React.Component {
 
   static defaultProps = {
     value: [],
-    maxRows: Infinity,
-    maxColumns: Infinity,
+    maxCols: Infinity,
     onSelectionStart: () => { },
     onInput: () => { },
     onChange: () => { },
@@ -50,9 +51,8 @@ export default class SlotsTable extends React.Component {
 
   state = {
     selectionStarted: false,
-    startRow: null,
+    selectedRow: null,
     startColumn: null,
-    endRow: null,
     endColumn: null,
     addMode: null
   };
@@ -69,18 +69,18 @@ export default class SlotsTable extends React.Component {
 
   render = () => {
     return (
-      <>
+      <div className={styles.tableContainer}>
         <table className={styles.slotsTable}>
           <thead>{this.renderColHerder()}</thead>
           <tbody>{this.renderRows()}</tbody>
         </table>
-      </>
+      </div>
     )
   };
 
   renderColHerder = () => (
     <tr>
-      <th>&nbsp;</th>
+      <th style={{ textAlign: "center" }}>Rooms</th>
       {this.props.colHeader.map((hour, i) => (
         <th key={i}>{hour}</th>
       ))}
@@ -91,7 +91,7 @@ export default class SlotsTable extends React.Component {
     <>
       {[...Array(this.props.rows)].map((x, i) => (
         <tr key={i}>
-          <th>{this.props.rowHeader[i]}</th>
+          <th><img src={this.props.rowHeader[i][0] === 'C' ? cokeIcon : pepsiIcon} alt=" " /> {this.props.rowHeader[i]}</th>
           {[...Array(this.props.cols)].map((x, j) => (
             <Cell
               key={j}
@@ -100,8 +100,9 @@ export default class SlotsTable extends React.Component {
               selected={this.props.value[i][j].selected}
               disabled={this.props.value[i][j].disabled}
               booked={this.props.value[i][j].booked}
+              making={this.props.value[i][j].making}
+              deleting={this.props.value[i][j].deleting}
               ticket={this.props.value[i][j].ticket}
-              hasChild={this.props.value[i][j].ticket && true}
               selecting={this.isCellSelecting(i, j)}
               onClickTicket={this.props.onClickTicket}
               decrypted={this.props.value[i][j].ticket?.decryptedTitle}
@@ -121,9 +122,8 @@ export default class SlotsTable extends React.Component {
       this.props.onSelectionStart({ row, column })
       this.setState({
         selectionStarted: true,
-        startRow: row,
+        selectedRow: row,
         startColumn: column,
-        endRow: row,
         endColumn: column,
         addMode: !this.props.value[row][column].selected
       })
@@ -131,26 +131,23 @@ export default class SlotsTable extends React.Component {
   };
 
   handleTouchMoveCell = (e) => {
+
     if (this.state.selectionStarted) {
       e.preventDefault()
-      const { row, column } = eventToCellLocation(e)
-      const { startRow, startColumn, endRow, endColumn } = this.state
+      const { column } = eventToCellLocation(e)
+      const { selectedRow, startColumn, endColumn } = this.state
 
-      if (endRow !== row || endColumn !== column) {
-        const nextRowCount =
-          startRow === null && endRow === null
-            ? 0
-            : Math.abs(row - startRow) + 1
+      if (endColumn !== column) {
+
         const nextColumnCount =
           startColumn === null && endColumn === null
             ? 0
             : Math.abs(column - startColumn) + 1
 
-        if (nextRowCount <= this.props.maxRows) {
-          this.setState({ endRow: row })
-        }
+        const selectedColumns = range(startColumn, column)
+        const isDisabledOrBookedIncluded = selectedColumns.some(col => this.props.value[selectedRow][col].disabled || this.props.value[selectedRow][col].booked)
 
-        if (nextColumnCount <= this.props.maxColumns) {
+        if (nextColumnCount <= this.props.maxCols && !isDisabledOrBookedIncluded) {
           this.setState({ endColumn: column })
         }
       }
@@ -162,38 +159,35 @@ export default class SlotsTable extends React.Component {
     const isTouch = e.type !== "mousedown"
     if (this.state.selectionStarted && (isLeftClick || isTouch)) {
       const value = cloneDeep(this.props.value)
-      const minRow = Math.min(this.state.startRow, this.state.endRow)
-      const maxRow = Math.max(this.state.startRow, this.state.endRow)
+      const row = this.state.selectedRow
       const selected = []
-      for (let row = minRow; row <= maxRow; row++) {
-        const minColumn = Math.min(
-          this.state.startColumn,
-          this.state.endColumn
-        )
-        const maxColumn = Math.max(
-          this.state.startColumn,
-          this.state.endColumn
-        )
-        for (let column = minColumn; column <= maxColumn; column++) {
-          value[row][column].selected = this.state.addMode
-          selected.push({ row, column })
-        }
+
+      const minColumn = Math.min(
+        this.state.startColumn,
+        this.state.endColumn
+      )
+      const maxColumn = Math.max(
+        this.state.startColumn,
+        this.state.endColumn
+      )
+      for (let column = minColumn; column <= maxColumn; column++) {
+        value[row][column].selected = this.state.addMode
+        selected.push({ row, column })
       }
+
       this.setState({ selectionStarted: false })
       this.props.onChange(value, selected)
     }
   };
 
   isCellSelecting = (row, column) => {
-    const minRow = Math.min(this.state.startRow, this.state.endRow)
-    const maxRow = Math.max(this.state.startRow, this.state.endRow)
+    const selectedRow = this.state.selectedRow
     const minColumn = Math.min(this.state.startColumn, this.state.endColumn)
     const maxColumn = Math.max(this.state.startColumn, this.state.endColumn)
 
     return (
       this.state.selectionStarted &&
-      row >= minRow &&
-      row <= maxRow &&
+      row === selectedRow &&
       column >= minColumn &&
       column <= maxColumn
     )

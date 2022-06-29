@@ -163,7 +163,7 @@ contract ColaDayBooking is Ownable {
      * @dev Deactivate a ticket by id - only the ticket owner can deactivate
      * @param _id The ticket id to remove
      */
-    function removeTicket(uint256 _id) external {
+    function deleteTicket(uint256 _id) external {
         // if the user doesn't own a ticket with the id, return error
         require(userToTickets[msg.sender][_id].isActive, "Ticket not found");
 

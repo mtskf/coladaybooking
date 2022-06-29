@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import styles from "./styles.module.scss"
 import { Ticket } from "types";
-import TicketBox from "./TicketBox"
+import TicketItem from "./TicketItem"
 
 interface PropsType {
   key: number;
@@ -9,8 +9,9 @@ interface PropsType {
   disabled: boolean;
   selecting: boolean;
   booked: boolean;
+  making: boolean;
+  deleting: boolean;
   ticket?: Ticket;
-  hasChild: boolean;
   decrypted: boolean;
   onTouchStart: any;
   onTouchMove: any;
@@ -23,7 +24,7 @@ function Cell ({ ...props }: PropsType) {
   const nextProps = useMemo<PropsType>(() => {
     return { ...props }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.selecting, props.selected, props.disabled, props.decrypted])
+  }, [props.selecting, props.selected, props.disabled, props.decrypted, props.booked, props.making, props.deleting])
 
   const tdRef = useRef<HTMLTableCellElement>(null);
 
@@ -52,17 +53,23 @@ function Cell ({ ...props }: PropsType) {
       // eslint-disable-next-line react-hooks/exhaustive-deps
       tdRef.current?.removeEventListener("touchmove", handleTouchMove);
     }
-  }, [props.selecting, props.selected, props.disabled, props.decrypted]);  // eslint-disable-line
+  }, []);  // eslint-disable-line
 
   const classNames = useMemo(() => {
     const classNames = []
+    if (props.ticket) {
+      classNames.push(styles.hasTicket)
+    }
 
     if (props.booked) {
       classNames.push(styles.booked)
-      if (props.hasChild) {
-        classNames.push(styles.hasChild)
-      }
-    } else if (props.disabled) {
+    } else if (props.making) {
+      classNames.push(styles.making);
+    } else if (props.making) {
+      classNames.push(styles.deleting);
+    }
+
+    if (props.disabled) {
       classNames.push(styles.disabled)
     } else {
       classNames.push(styles.enabled)
@@ -76,7 +83,7 @@ function Cell ({ ...props }: PropsType) {
 
     return classNames;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.selecting, props.selected, props.disabled, props.decrypted])
+  }, [props.selecting, props.selected, props.disabled, props.decrypted, props.booked, props.making, props.deleting])
 
   return (
     <td
@@ -85,7 +92,7 @@ function Cell ({ ...props }: PropsType) {
       onMouseDown={handleTouchStart}
       onMouseMove={handleTouchMove}
     >
-      {nextProps.hasChild && <TicketBox ticket={nextProps.ticket!} onClickTicket={nextProps.onClickTicket} />}
+      {nextProps.ticket && <TicketItem isPending={nextProps.making || nextProps.deleting} ticket={nextProps.ticket!} onClickTicket={nextProps.onClickTicket} />}
       <p>{ }</p>
     </td>
   );
