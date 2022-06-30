@@ -15,10 +15,14 @@ This application is a proof of concept for a room booking system for Cola Day 20
 - encrypts event titles with public key encryption (end to end)
 
 ## Usage
-- On your browser, login to MetaMask and connect to Ropsten Test Network
+- On your browser, login to MetaMask and connect to Ropsten Test Network.
 - Visit the demo site: https://coladay.vercel.app/
 - Then, drag your mouse over the timetable to start booking rooms!
-- Note: Each time you create or delete an event on the blockchain, you will need Ethereum gas for the transaction.
+
+### Note
+- This web app is designed for Desktop/Laptop devices, not compatible with mobile browsers.
+- Each time you create or delete an event on the blockchain, you will need Ethereum gas for the transaction.
+- The event date is automatically updated to tomorrow for demo purpose.
 
 ## Dev setup
 
