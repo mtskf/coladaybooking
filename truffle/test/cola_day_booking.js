@@ -137,7 +137,7 @@ contract("ColaDayBooking", (accounts) => {
       assert.equal(tickets[1].isEncrypted, true, "isEncrypted ok")
     })
   })
-  context("Remove ticket", async () => {
+  context("Delete ticket", async () => {
     it("Booking rooms", async () => {
       try {
         await instance.book("test", "C01", 8, 2, false)
@@ -187,8 +187,8 @@ contract("ColaDayBooking", (accounts) => {
       }
       let tickets = await instance.getTickets()
 
-      assert(true, "Remove ticket")
-      await instance.removeTicket(tickets[0].id)
+      assert(true, "Delete ticket")
+      await instance.deleteTicket(tickets[0].id)
       tickets = await instance.getTickets()
       const slots = await instance.getSlots()
 
