@@ -24,6 +24,9 @@ This application is a proof of concept for a room booking system for Cola Day 20
 - Each time you create or delete an event on the blockchain, you will need Ethereum gas for the transaction.
 - The event date is automatically updated to tomorrow for demo purpose.
 
+## Architecture
+![architecture](https://user-images.githubusercontent.com/315819/177228481-46d1a204-e096-4187-bfd6-523b1ecbac58.png)
+
 ## Dev setup
 
 ### Contract
