@@ -15,7 +15,7 @@ This application is a proof of concept for a room booking system for Cola Day 20
 - encrypts event titles with public key encryption (end to end)
 
 ## Usage
-- On your browser, login to MetaMask and connect to Ropsten Test Network.
+- On your browser, login to MetaMask and connect to Ropsten Testnet.
 - Visit the demo site: https://coladay.vercel.app/
 - Then, drag your mouse over the timetable to start booking rooms!
 
@@ -52,7 +52,7 @@ $ truffle compile && truffle migrate --network develop
 $ truffle test --show-events
 ```
 
-#### Deploy to Ropsten Test Net
+#### Deploy to Ropsten Testnet
 ```sh
 $ truffle compile &&truffle migrate --network ropsten
 ```
