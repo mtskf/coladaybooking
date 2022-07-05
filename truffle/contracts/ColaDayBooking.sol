@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  * with ETH
  */
 contract ColaDayBooking is Ownable {
-    string[] private ROOMS = [
+    string[20] private ROOMS = [
         "C01",
         "C02",
         "C03",
