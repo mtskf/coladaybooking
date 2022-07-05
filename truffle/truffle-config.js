@@ -1,4 +1,4 @@
-const { projectId, mnemonic } = require('./secrets.json')
+const { projectId, mnemonic, etherscanApiKey } = require('./secrets.json')
 const HDWalletProvider = require('@truffle/hdwallet-provider')
 
 module.exports = {
@@ -35,4 +35,10 @@ module.exports = {
       }
     }
   },
+
+  plugins: ['truffle-plugin-verify'],
+
+  api_keys: {
+    etherscan: etherscanApiKey
+  }
 }
