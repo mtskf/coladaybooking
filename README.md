@@ -5,7 +5,8 @@ This application is a proof of concept for a room booking system for Cola Day 20
 [<img width="1157" alt="demo" src="https://user-images.githubusercontent.com/315819/176455131-6ed7c308-21b5-4dde-b988-0265eb836842.png">](https://coladay.vercel.app/)
 
 ## Demo
-- https://coladay.vercel.app/
+- Dapp: https://coladay.vercel.app/
+- Contract: [0x40b5A678f5151423fB8D43712BF0e76d991a1fa7](https://ropsten.etherscan.io/address/0x40b5A678f5151423fB8D43712BF0e76d991a1fa7#contracts)
 
 ## Features
 - shows meeting rooms availability
@@ -30,6 +31,16 @@ This application is a proof of concept for a room booking system for Cola Day 20
 ## Dev setup
 
 ### Contract
+
+#### Set up secret keys & mnemonic phrase
+```sh
+$ cd truffle
+$ mv secrets_template.json secrets.json
+```
+Then, edit the secrets.json file with your own secret keys and mnemonic phrase:
+- mnemonic -> use your account on testnet. To create a new account, run `$ npx mnemonics`.
+- projectId -> use your project ID on Infura
+- etherscanApiKey
 
 #### Install dependencies
 ```sh
